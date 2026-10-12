@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="대기 현상 10가지의 크기와 지속 시간을 예상하고, 10배 눈금 로그 격자에 상자로 그린 뒤 보기 그림과 비교하는 활동">
+<title>시공간 규모 격자</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: a lab worksheet. Step 1 is a ruled ledger of predictions, step 2 a large log-log sheet to draw on, step 3 an overlay to compare. One column throughout; the ledger stacks on phones. */
+:root{
+  --paper:#eef2ef; --sheet:#ffffff; --ink:#16222a; --ink-2:#55646b; --line:#d3dcd8;
+  --rule:#e3e9e6; --rule-strong:#b9c5c1; --frame:#2e3d45;
+  --accent:#0b6475; --accent-soft:#dcecef; --on-accent:#ffffff;
+  --p1:#c63f37; --p2:#b67d0b; --p3:#2c8659; --p4:#3453a3;
+  --ref:#7b3a92; --ref-soft:rgba(123,58,146,.07); --example:#8b989e;
+  --font-display:"Hahmlet","Noto Serif KR","AppleMyungjo",serif;
+  --font-body:"IBM Plex Sans KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-data:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f1518; --sheet:#162026; --ink:#e4ebe8; --ink-2:#9ba9af; --line:#2b383e;
+    --rule:#212e34; --rule-strong:#3d4e55; --frame:#a8b7bc;
+    --accent:#5cb8c9; --accent-soft:#16343b; --on-accent:#0b1a1e;
+    --p1:#ef6f63; --p2:#e2b04b; --p3:#5fc28f; --p4:#819de4;
+    --ref:#cf95e6; --ref-soft:rgba(207,149,230,.10); --example:#7e8c92;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f1518; --sheet:#162026; --ink:#e4ebe8; --ink-2:#9ba9af; --line:#2b383e;
+  --rule:#212e34; --rule-strong:#3d4e55; --frame:#a8b7bc;
+  --accent:#5cb8c9; --accent-soft:#16343b; --on-accent:#0b1a1e;
+  --p1:#ef6f63; --p2:#e2b04b; --p3:#5fc28f; --p4:#819de4;
+  --ref:#cf95e6; --ref-soft:rgba(207,149,230,.10); --example:#7e8c92;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:24px}
+h1,h2{font-family:var(--font-display);font-weight:700;line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.2vw,36px);letter-spacing:-.01em}
+h2{font-size:21px}
+p{margin:0}
+.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.06em;color:var(--accent)}
+.lede{max-width:62ch;color:var(--ink-2)}
+.mast{display:grid;gap:10px;padding-block:4px 0}
+.ident{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px}
+.ident label{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink-2);white-space:nowrap}
+.ident input{width:9.5em}
+.status-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.pill{font-family:var(--font-data);font-size:12.5px;border:1px solid var(--line);background:var(--sheet);padding:2px 10px;border-radius:999px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.pill b{color:var(--ink);font-weight:500}
+
+input[type="text"],textarea{font:inherit;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--rule-strong);padding:5px 2px;min-width:0;width:100%;border-radius:0}
+textarea{border:1px solid var(--rule-strong);border-radius:4px;padding:8px 10px;resize:vertical;min-height:84px}
+input[type="text"]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 1px 0 0 var(--accent)}
+textarea:focus{box-shadow:0 0 0 1px var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--ink-2);opacity:.75}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.step{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding-block:22px;padding-inline:clamp(16px,3vw,28px);display:grid;gap:16px;min-width:0}
+.step-head{display:flex;gap:14px;align-items:flex-start}
+.step-no{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1;color:var(--accent);min-width:1ch}
+.step-sub{font-size:13px;color:var(--ink-2);margin-top:2px}
+.note{font-size:13.5px;color:var(--ink-2);max-width:70ch}
+
+.scales{display:grid;gap:8px}
+.scale-row{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
+.scale-row > span:first-child{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--ink-2);min-width:5.5em}
+.tick{font-size:13px;border:1px dashed var(--rule-strong);border-radius:4px;padding:1px 8px;white-space:nowrap}
+.tick em{font-style:normal;font-family:var(--font-data);font-size:12.5px;color:var(--accent)}
+
+.ledger{display:grid;border-top:2px solid var(--frame)}
+.lrow{display:grid;grid-template-columns:minmax(170px,1.15fr) 1fr 1fr 1.35fr;gap:4px 16px;padding-block:9px;border-bottom:1px solid var(--line);align-items:end}
+.lhead{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--ink-2);align-items:center;padding-block:8px}
+.pname{display:grid;gap:0;min-width:0}
+.pname b{font-weight:600;font-size:15px}
+.pname small{font-size:12px;color:var(--ink-2);line-height:1.45}
+.num{font-family:var(--font-data);color:var(--accent);margin-right:4px}
+.cell-label{display:none;font-size:11.5px;color:var(--ink-2)}
+.lrow > label{min-width:0;display:grid}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:760px){
+  .lhead{display:none}
+  .lrow{grid-template-columns:1fr 1fr;gap:6px 14px}
+  .pname{grid-column:1 / -1}
+  .lrow > label.why{grid-column:1 / -1}
+  .cell-label{display:block}
+}
+
+.picker{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:5px 12px 5px 9px;font-size:14px;line-height:1.3}
+.chip .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dot,var(--ink-2));background:transparent;flex:none}
+.chip.is-drawn .dot{background:var(--dot,var(--ink-2))}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
+.chip[aria-pressed="true"] .dot{border-color:var(--sheet)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
+.toolbar .now{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;min-width:0}
+.toolbar .now strong{font-weight:600}
+.range{font-family:var(--font-data);font-size:13px;color:var(--ink-2)}
+.swatches{display:flex;gap:6px;align-items:center}
+.swatches > span{font-size:12.5px;color:var(--ink-2);margin-right:2px}
+.sw{width:24px;height:24px;border-radius:50%;border:2px solid var(--sheet);box-shadow:0 0 0 1px var(--line);background:var(--sw)}
+.sw[data-c="0"]{background:repeating-linear-gradient(45deg,var(--sheet) 0 3px,var(--line) 3px 5px)}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.btn{border:1px solid var(--frame);background:transparent;border-radius:6px;padding:7px 14px;font-size:14px;font-weight:500}
+.btn:hover{background:var(--accent-soft)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent);filter:brightness(1.08)}
+.btn-quiet{border-color:var(--line);color:var(--ink-2)}
+.btn[aria-pressed="true"]{background:var(--ref);border-color:var(--ref);color:var(--sheet)}
+
+.sheetbox{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.readout{font-family:var(--font-data);font-size:13px;padding:8px 12px;border-bottom:1px solid var(--line);min-height:2.4em;color:var(--ink-2);font-variant-numeric:tabular-nums;background:var(--paper)}
+.readout b{color:var(--ink);font-weight:500}
+svg#grid{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair;background:var(--sheet)}
+.svg-note{font-size:12px;color:var(--ink-2);padding:6px 12px;border-top:1px solid var(--line)}
+
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 18px}
+.group{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center}
+.group .gs{width:14px;height:14px;border-radius:50%;background:var(--sw)}
+.group .members{grid-column:2;font-size:12.5px;color:var(--ink-2);min-height:1.4em}
+
+.refpanel{display:grid;gap:10px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--ink-2);border-bottom:2px solid var(--frame)}
+td.mono{font-family:var(--font-data);font-size:12.5px;white-space:nowrap}
+.reflect{display:grid;gap:6px;font-size:14px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.msg{font-size:13px;color:var(--accent)}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;padding:8px 12px;border:1px solid var(--p1);border-radius:6px}
+.fallback{width:100%;min-height:160px;font-family:var(--font-data);font-size:12.5px}
+footer{font-size:12px;color:var(--ink-2);max-width:70ch}
+@media (max-width:560px){
+  .step{padding-inline:12px}
+  .sheetbox{margin-inline:-6px}
+  .readout{font-size:12.5px;padding-inline:10px}
+  .toolbar{padding:10px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="eyebrow">과학과교육2(지구과학) · 7주차 · 시간 규모와 공간 규모</p>
+    <h1>크기와 지속 시간, 예상하고 배치하기</h1>
+    <p class="lede">대기 현상 10가지가 얼마나 크고 얼마나 오래 가는지 어림한 뒤, 가로·세로 모두 한 칸이 10배인 격자 위에 상자로 그려 봅니다.</p>
+    <div class="ident">
+      <label for="who-id">학번 <input type="text" id="who-id" autocomplete="off"></label>
+      <label for="who-name">이름 <input type="text" id="who-name" autocomplete="off"></label>
+      <label for="who-team">모둠 <input type="text" id="who-team" autocomplete="off"></label>
+    </div>
+    <div class="status-line">
+      <span class="pill">예상 <b id="n-pred">0</b>/10</span>
+      <span class="pill">배치 <b id="n-box">0</b>/10</span>
+    </div>
+  </header>
+
+  <section class="step" id="step1" aria-labelledby="h-step1">
+    <div class="step-head"><span class="step-no" aria-hidden="true">1</span><div><h2 id="h-step1">예상하기</h2><p class="step-sub">개인 · 일상의 크기와 시간에 빗대어 어림합니다</p></div></div>
+    <div class="scales">
+      <div class="scale-row"><span>크기 기준</span>
+        <span class="tick">교실 <em>10 m</em></span><span class="tick">운동장 <em>100 m</em></span><span class="tick">집~학교 <em>1 km</em></span><span class="tick">시·군 <em>10 km</em></span><span class="tick">한반도 남북 <em>1,000 km</em></span><span class="tick">지구 둘레 <em>40,000 km</em></span>
+      </div>
+      <div class="scale-row"><span>시간 기준</span>
+        <span class="tick">1분 <em>60초</em></span><span class="tick">1시간 <em>3,600초</em></span><span class="tick">1일 <em>86,400초</em></span><span class="tick">1주일 <em>604,800초</em></span><span class="tick">1년 <em>약 31,500,000초</em></span>
+      </div>
+    </div>
+    <p class="note">모두 어림값입니다. 정확한 값보다 자릿수가 중요합니다. 수 m인지, 수십 km인지, 수천 km인지를 먼저 정해 보세요.</p>
+    <div class="ledger" id="ledger">
+      <div class="lrow lhead" aria-hidden="true"><span>현상</span><span>크기 예상 (무엇만 한가?)</span><span>지속 시간 예상 (얼마나 가나?)</span><span>그렇게 생각한 근거</span></div>
+    </div>
+  </section>
+
+  <section class="step" id="step2" aria-labelledby="h-step2">
+    <div class="step-head"><span class="step-no" aria-hidden="true">2</span><div><h2 id="h-step2">배치하기</h2><p class="step-sub">모둠 · 예상한 범위를 격자 위에 상자로 그립니다</p></div></div>
+    <p class="note">현상을 고른 뒤 격자 위에서 끌어 상자를 그립니다. 가로 폭은 크기의 범위, 세로 높이는 지속 시간의 범위입니다. 다시 끌면 고쳐 그려지고, 다 그리면 다음 현상으로 넘어갑니다.</p>
+    <div class="picker" id="picker" role="group" aria-label="그릴 현상 고르기"></div>
+    <div class="toolbar">
+      <div class="now"><span>지금 그리는 현상</span><strong id="act-name"></strong><span class="range" id="act-range"></span></div>
+      <div class="swatches" role="group" aria-label="묶음 색">
+        <span>묶음 색</span>
+        <button class="sw" data-c="0" aria-label="색 없음" aria-pressed="true" type="button"></button>
+        <button class="sw" data-c="1" style="--sw:var(--p1)" aria-label="빨강" aria-pressed="false" type="button"></button>
+        <button class="sw" data-c="2" style="--sw:var(--p2)" aria-label="노랑" aria-pressed="false" type="button"></button>
+        <button class="sw" data-c="3" style="--sw:var(--p3)" aria-label="초록" aria-pressed="false" type="button"></button>
+        <button class="sw" data-c="4" style="--sw:var(--p4)" aria-label="파랑" aria-pressed="false" type="button"></button>
+      </div>
+      <button class="btn btn-quiet" id="erase" type="button">이 상자 지우기</button>
+    </div>
+    <div class="sheetbox">
+      <div class="readout" id="readout">격자 위에 커서를 올리면 그 자리의 크기와 시간을 읽어 줍니다.</div>
+      <svg id="grid" viewBox="0 0 760 458" role="img" aria-label="공간 규모와 시간 규모의 로그 격자. 가로는 0.001 km에서 40,000 km, 세로는 1초에서 10,000,000초"></svg>
+      <p class="svg-note" id="svg-note">점선은 1분·1시간·1일·1주일·1개월 자리입니다. 회색 점선 상자는 그리는 방법을 보여 주는 예시이며, 첫 상자를 그리면 사라집니다.</p>
+    </div>
+    <div>
+      <p class="note" style="margin-bottom:8px">가까이 모인 현상끼리 같은 색으로 칠하고, 묶음마다 이름을 붙여 보세요.</p>
+      <div class="groups" id="groups"></div>
+    </div>
+  </section>
+
+  <section class="step" id="step3" aria-labelledby="h-step3">
+    <div class="step-head"><span class="step-no" aria-hidden="true">3</span><div><h2 id="h-step3">비교하기</h2><p class="step-sub">전체 · 모둠 비교를 마친 뒤 보기 그림의 범위를 겹쳐 봅니다</p></div></div>
+    <div class="actions">
+      <button class="btn" id="ref-toggle" type="button" aria-pressed="false">보기 그림 범위 겹쳐 보기</button>
+      <span class="msg" id="ref-msg" role="status"></span>
+    </div>
+    <div class="refpanel" id="refpanel" hidden>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>규모 구분</th><th>현상</th><th>공간 규모</th><th>시간 규모</th></tr></thead>
+          <tbody>
+            <tr><td>미규모</td><td>① 난류</td><td class="mono">약 1 m ~ 100 m</td><td class="mono">약 1초 ~ 100초</td></tr>
+            <tr><td>미규모</td><td>② 토네이도</td><td class="mono">약 100 m ~ 1 km</td><td class="mono">약 100초 ~ 10⁴초</td></tr>
+            <tr><td>중간규모</td><td>③ 해륙풍 ④ 산곡풍 ⑤ 뇌우</td><td class="mono">약 1 ~ 100 km</td><td class="mono">약 10⁴초 ~ 1일</td></tr>
+            <tr><td>종관규모</td><td>⑥ 태풍</td><td class="mono">약 100 ~ 500 km</td><td class="mono">약 1일 ~ 1주일</td></tr>
+            <tr><td>종관규모</td><td>⑦ 고기압·저기압</td><td class="mono">약 500 ~ 3,000 km</td><td class="mono">약 1일 ~ 1주일</td></tr>
+            <tr><td>지구규모</td><td>⑧ 편서풍 파동 ⑨ 계절풍 ⑩ 대기 대순환</td><td class="mono">약 3,000 ~ 40,000 km</td><td class="mono">1주일 이상</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">보기 그림에서 읽은 어림값입니다. 규모 구분의 경계는 문헌마다 다르고, 실제 태풍처럼 그림의 범위보다 클 수 있는 현상도 있습니다. 정확한 값보다 자릿수와 순서가 맞는지를 보세요.</p>
+    </div>
+    <label class="reflect" for="reflect">내 상자와 가장 많이 달랐던 현상은 무엇인가요? 왜 그렇게 예상했나요?
+      <textarea id="reflect"></textarea>
+    </label>
+    <div class="actions">
+      <button class="btn btn-primary" id="copy" type="button">결과를 글로 복사</button>
+      <button class="btn" id="save-png" type="button" hidden>격자 그림 저장 (PNG)</button>
+      <button class="btn btn-quiet" id="reset" type="button">모두 지우기</button>
+      <span class="msg" id="export-msg" role="status"></span>
+    </div>
+    <div class="confirm" id="confirm" hidden>
+      <span>예상, 상자, 묶음, 생각을 모두 지웁니다.</span>
+      <button class="btn" id="confirm-yes" type="button">지우기</button>
+      <button class="btn btn-quiet" id="confirm-no" type="button">취소</button>
+    </div>
+    <textarea class="fallback" id="fallback" hidden aria-label="복사할 결과"></textarea>
+  </section>
+
+  <footer>입력한 내용은 이 브라우저에만 임시로 남습니다. 제출할 때는 글로 복사하거나 격자 그림을 저장해 쓰세요.</footer>
+</div>
+
+<script>
+(() => {
+  const PH = [
+    {id:1, name:'난류', hint:'굴뚝 연기가 소용돌이치며 흩어지는 모습, 비행기가 흔들리는 기류'},
+    {id:2, name:'토네이도', hint:'뇌우 구름 아래로 내려오는 깔때기 모양의 강한 회오리바람'},
+    {id:3, name:'해륙풍', hint:'바닷가에서 낮에는 바다 쪽에서, 밤에는 육지 쪽에서 부는 바람'},
+    {id:4, name:'산곡풍', hint:'낮에는 골짜기에서 산비탈로, 밤에는 산비탈에서 골짜기로 부는 바람'},
+    {id:5, name:'뇌우', hint:'번개·천둥을 동반한 여름 오후의 소나기구름'},
+    {id:6, name:'태풍', hint:'열대 바다에서 만들어져 우리나라로 올라오는 강한 열대저기압'},
+    {id:7, name:'고기압·저기압', hint:'일기도의 H·L, 날씨를 맑게 하거나 흐리게 하며 지나가는 기압'},
+    {id:8, name:'편서풍 파동', hint:'중위도 높은 하늘에서 남북으로 굽이치며 지구를 도는 서풍의 물결'},
+    {id:9, name:'계절풍', hint:'우리나라에서 겨울에는 북서풍, 여름에는 남동풍이 주로 부는 것'},
+    {id:10, name:'대기 대순환', hint:'적도에서 극까지 이어지는 지구 전체의 바람 띠(무역풍·편서풍·극동풍)'}
+  ];
+  const CIRC = ['', '①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+  const CNAME = ['색 없음','빨강','노랑','초록','파랑'];
+  const KEY = 'scale-grid-activity-v1';
+  const COARSE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+
+  // Geometry of the log-log sheet. The viewBox follows the sheet's real pixel width, so labels stay legible on phones.
+  const LXMIN = -3, LXMAX = Math.log10(40000), LYMIN = 0, LYMAX = 7;
+  const lg = Math.log10;
+  function geom(w) {
+    const W = Math.round(Math.max(300, Math.min(760, w || 760)));
+    const compact = W < 560;
+    const X0 = compact ? 48 : 112, RIGHT = compact ? 38 : 86, YT = 46, DY = compact ? 46 : 47;
+    const DX = (W - X0 - RIGHT) / (LXMAX - LXMIN), YB = YT + (LYMAX - LYMIN) * DY;
+    return {W, H: Math.round(YB + (compact ? 72 : 83)), X0, DX, YT, DY, YB, XR: X0 + (LXMAX - LXMIN) * DX, compact};
+  }
+  let G = geom(760);
+  const X = lx => G.X0 + (lx - LXMIN) * G.DX;
+  const Y = ly => G.YT + (LYMAX - ly) * G.DY;
+
+  const REF = [
+    {label:'①', x:[0.001,0.1], y:[1,100]},
+    {label:'②', x:[0.1,1], y:[100,1e4]},
+    {label:'③④⑤', x:[1,100], y:[1e4,86400]},
+    {label:'⑥', x:[100,500], y:[86400,604800]},
+    {label:'⑦', x:[500,3000], y:[86400,604800]},
+    {label:'⑧⑨⑩ ↑', x:[3000,40000], y:[604800,1e7]}
+  ];
+  const BANDS = [
+    {name:'미규모', short:'미', x:[0.001,1]}, {name:'중간규모', short:'중간', x:[1,100]},
+    {name:'종관규모', short:'종관', x:[100,3000]}, {name:'지구규모', short:'지구', x:[3000,40000]}
+  ];
+  const EXAMPLE = {x1:lg(0.1), x2:lg(10), y1:lg(3600), y2:lg(18000)};
+
+  const blank = () => ({
+    who:{id:'', name:'', team:''},
+    pred:Object.fromEntries(PH.map(p => [p.id, {size:'', time:'', why:''}])),
+    boxes:{}, color:{}, groups:['', '', '', '', ''], reflect:'', active:1, showRef:false
+  });
+  let S = blank();
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { const d = JSON.parse(raw); S = Object.assign(blank(), d); S.pred = Object.assign(blank().pred, d.pred || {}); }
+  } catch (e) { /* storage unavailable: start fresh */ }
+  let saveTimer = null;
+  const persist = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); };
+
+  // ---------- formatting ----------
+  const nice = x => {
+    if (x >= 10) { const p = 10 ** (Math.floor(lg(x)) - 1); return (Math.round(x / p) * p).toLocaleString('ko-KR'); }
+    return (Math.round(x * 10) / 10).toLocaleString('ko-KR');
+  };
+  const fmtLen = l => { const km = 10 ** l; return km < 1 ? nice(Math.max(1, km * 1000)) + ' m' : nice(km) + ' km'; };
+  const fmtTime = l => {
+    const s = 10 ** l;
+    if (s < 60) return nice(Math.max(1, s)) + '초';
+    if (s < 3600) return nice(s / 60) + '분';
+    if (s < 86400) return nice(s / 3600) + '시간';
+    if (s < 604800) return nice(s / 86400) + '일';
+    if (s < 2592000) return nice(s / 604800) + '주';
+    return nice(s / 2592000) + '개월';
+  };
+  const fmtBox = b => `약 ${fmtLen(b.x1)}~${fmtLen(b.x2)} · 약 ${fmtTime(b.y1)}~${fmtTime(b.y2)}`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // ---------- SVG builder (shared by screen and PNG export) ----------
+  const VARS = {
+    sheet:'var(--sheet)', ink:'var(--ink)', ink2:'var(--ink-2)', rule:'var(--rule)', ruleStrong:'var(--rule-strong)',
+    frame:'var(--frame)', accent:'var(--accent)', ref:'var(--ref)', refSoft:'var(--ref-soft)', example:'var(--example)',
+    p:['var(--accent)','var(--p1)','var(--p2)','var(--p3)','var(--p4)'],
+    font:"'IBM Plex Sans KR','Noto Sans KR',sans-serif", mono:"'IBM Plex Mono',ui-monospace,monospace"
+  };
+  const LIGHT = {
+    sheet:'#ffffff', ink:'#16222a', ink2:'#55646b', rule:'#e3e9e6', ruleStrong:'#b9c5c1', frame:'#2e3d45',
+    accent:'#0b6475', ref:'#7b3a92', refSoft:'rgba(123,58,146,.07)', example:'#8b989e',
+    p:['#0b6475','#c63f37','#b67d0b','#2c8659','#3453a3'],
+    font:"'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif", mono:'Menlo,Consolas,monospace'
+  };
+  const minorX = [], minorY = [];
+  for (let e = -3; e <= 4; e++) for (let k = 2; k <= 9; k++) { const v = k * 10 ** e; if (lg(v) < LXMAX) minorX.push(lg(v)); }
+  for (let e = 0; e <= 6; e++) for (let k = 2; k <= 9; k++) minorY.push(e + lg(k));
+  const majorX = [-3,-2,-1,0,1,2,3,4], majorY = [0,1,2,3,4,5,6,7];
+  // [value, full label, compact label]
+  const XTICK = [[0.001,'0.001','0.001'],[0.01,'0.01','0.01'],[0.1,'0.1','0.1'],[1,'1','1'],[10,'10','10'],[100,'100','100'],[1000,'1,000','1천'],[10000,'10,000','1만'],[40000,'40,000','4만']];
+  const XSUB = [[0.001,'(1 m)'],[0.01,'(10 m)'],[0.1,'(100 m)'],[40000,'(지구 둘레)']];
+  const XSUB_C = [[0.001,'(1 m)'],[40000,'(지구 둘레)']];
+  const YLAB_C = ['1','10','100','1천','1만','10만','100만','1천만'];
+  const MARKS = [[60,'1분','1분'],[3600,'1시간','1시간'],[86400,'1일','1일'],[604800,'1주일','1주'],[2592000,'1개월','1달']];
+
+  function build(P, opt) {
+    const g = G, c = g.compact, o = [];
+    const vline = l => `M${X(l).toFixed(2)} ${g.YT}V${g.YB}`, hline = l => `M${g.X0} ${Y(l).toFixed(2)}H${g.XR.toFixed(2)}`;
+    o.push(`<rect x="0" y="0" width="${g.W}" height="${g.H}" fill="${P.sheet}"/>`);
+    o.push(`<path d="${minorX.map(vline).join('')}${minorY.map(hline).join('')}" stroke="${P.rule}" stroke-width="0.6" fill="none"/>`);
+    o.push(`<path d="${majorX.map(vline).join('')}${majorY.map(hline).join('')}" stroke="${P.ruleStrong}" stroke-width="1" fill="none"/>`);
+    o.push(`<path d="${MARKS.map(([s]) => `M${g.X0} ${Y(lg(s)).toFixed(2)}H${(g.XR + 4).toFixed(2)}`).join('')}" stroke="${P.ink2}" stroke-width="0.9" stroke-dasharray="4 4" fill="none" opacity="0.8"/>`);
+    o.push(`<rect x="${g.X0}" y="${g.YT}" width="${(g.XR - g.X0).toFixed(2)}" height="${g.YB - g.YT}" fill="none" stroke="${P.frame}" stroke-width="1.3"/>`);
+    const T = (x, y, s, a = {}) => `<text x="${(+x).toFixed(2)}" y="${(+y).toFixed(2)}" font-size="${a.size || 13}" fill="${a.fill || P.ink}" font-family="${a.mono ? P.mono : P.font}"${a.anchor ? ` text-anchor="${a.anchor}"` : ''}${a.weight ? ` font-weight="${a.weight}"` : ''}${a.extra || ''}>${esc(s)}</text>`;
+    MARKS.forEach(([s, t, ts]) => o.push(T(g.XR + (c ? 6 : 8), Y(lg(s)) + 4, c ? ts : t, {size: c ? 10.5 : 12.5, fill:P.ink2})));
+    XTICK.forEach(([v, t, ts]) => o.push(T(X(lg(v)), g.YB + (c ? 16 : 19), c ? ts : t, {size: c ? 10.5 : 12, anchor:'middle'})));
+    (c ? XSUB_C : XSUB).forEach(([v, t]) => o.push(T(X(lg(v)), g.YB + (c ? 30 : 35), t, {size: c ? 10 : 11, anchor: c && v === 40000 ? 'end' : 'middle', fill:P.ink2})));
+    majorY.forEach(e => o.push(T(g.X0 - (c ? 5 : 8), Y(e) + 4, c ? YLAB_C[e] : (10 ** e).toLocaleString('en-US'), {size: c ? 10.5 : 12.5, anchor:'end', mono: !c})));
+    o.push(T((g.X0 + g.XR) / 2, g.YB + (c ? 55 : 62), '공간 규모: 수평 크기 (km)', {size: c ? 12.5 : 14, anchor:'middle', weight:600}));
+    const ym = (g.YT + g.YB) / 2, yx = c ? 12 : 22;
+    o.push(T(yx, ym, '시간 규모: 지속 시간 (초)', {size: c ? 12.5 : 14, anchor:'middle', weight:600, extra:` transform="rotate(-90 ${yx} ${ym.toFixed(2)})"`}));
+
+    // reference overlay
+    if (opt.showRef) {
+      BANDS.forEach((b, i) => {
+        const x1 = X(lg(b.x[0])), x2 = X(lg(b.x[1]));
+        o.push(`<rect x="${x1.toFixed(2)}" y="14" width="${(x2 - x1).toFixed(2)}" height="24" fill="${P.refSoft}" stroke="${P.ref}" stroke-width="1"/>`);
+        o.push(T((x1 + x2) / 2, 30.5, c ? b.short : b.name, {size: c ? 10.5 : 12, anchor:'middle', weight:600, fill:P.ref}));
+        if (i > 0) o.push(`<path d="M${x1.toFixed(2)} 38V${g.YB}" stroke="${P.ref}" stroke-width="1" stroke-dasharray="2 4" opacity="0.7"/>`);
+      });
+      REF.forEach(r => {
+        const x1 = X(lg(r.x[0])), x2 = X(lg(r.x[1])), y1 = Y(lg(r.y[1])), y2 = Y(lg(r.y[0]));
+        o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" fill="${P.refSoft}" stroke="${P.ref}" stroke-width="1.6" stroke-dasharray="6 4"/>`);
+        o.push(T((x1 + x2) / 2, y1 + (c ? 13 : 15), c ? r.label.replace(' ↑', '') : r.label, {size: c ? 10 : 12, anchor:'middle', weight:600, fill:P.ref}));
+      });
+    }
+
+    // example box (only before the first box is drawn)
+    const ids = Object.keys(opt.boxes);
+    if (!ids.length && opt.example) {
+      const b = EXAMPLE, x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
+      o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" fill="none" stroke="${P.example}" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>`);
+      o.push(T((x1 + x2) / 2, (y1 + y2) / 2 + 4, c ? '예시' : '예) 아침 안개', {size: c ? 11 : 12.5, anchor:'middle', fill:P.example}));
+    }
+
+    // student boxes
+    ids.map(Number).sort((a, b) => (a === opt.active) - (b === opt.active) || a - b).forEach(id => {
+      const b = opt.boxes[id], col = P.p[opt.color[id] || 0];
+      const x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
+      const on = id === opt.active;
+      o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" rx="3" fill="${col}" fill-opacity="${on ? 0.22 : 0.14}" stroke="${col}" stroke-width="${on ? 2.6 : 1.8}"/>`);
+      o.push(T((x1 + x2) / 2, (y1 + y2) / 2 + (c ? 4.5 : 5), CIRC[id], {size: c ? 13 : 15, anchor:'middle', weight:600, fill:col}));
+    });
+    return o.join('');
+  }
+
+  // ---------- DOM ----------
+  const $ = s => document.querySelector(s);
+  const svg = $('#grid');
+  const ledger = $('#ledger'), picker = $('#picker'), groupsEl = $('#groups');
+
+  PH.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'lrow';
+    row.innerHTML = `
+      <div class="pname"><b><span class="num">${CIRC[p.id]}</span>${p.name}</b><small>${p.hint}</small></div>
+      <label for="p${p.id}-size"><span class="cell-label">크기 예상</span><span class="vh">${p.name} 크기 예상</span><input type="text" id="p${p.id}-size" autocomplete="off" placeholder="무엇만 한가?"></label>
+      <label for="p${p.id}-time"><span class="cell-label">지속 시간 예상</span><span class="vh">${p.name} 지속 시간 예상</span><input type="text" id="p${p.id}-time" autocomplete="off" placeholder="얼마나 가나?"></label>
+      <label class="why" for="p${p.id}-why"><span class="cell-label">근거</span><span class="vh">${p.name} 근거</span><input type="text" id="p${p.id}-why" autocomplete="off" placeholder="그렇게 생각한 근거"></label>`;
+    ledger.appendChild(row);
+    ['size','time','why'].forEach(k => {
+      const el = row.querySelector(`#p${p.id}-${k}`);
+      el.value = S.pred[p.id][k] || '';
+      el.addEventListener('input', () => { S.pred[p.id][k] = el.value; persist(); counts(); });
+    });
+    const chip = document.createElement('button');
+    chip.type = 'button'; chip.className = 'chip'; chip.dataset.id = p.id;
+    chip.innerHTML = `<span class="dot" aria-hidden="true"></span><span>${CIRC[p.id]} ${p.name}</span>`;
+    chip.addEventListener('click', () => { S.active = p.id; persist(); refresh(); });
+    picker.appendChild(chip);
+  });
+
+  for (let c = 1; c <= 4; c++) {
+    const g = document.createElement('div');
+    g.className = 'group';
+    g.innerHTML = `<span class="gs" style="--sw:var(--p${c})" aria-hidden="true"></span><label for="group-${c}" class="vh">${CNAME[c]} 묶음 이름</label><input type="text" id="group-${c}" autocomplete="off" placeholder="${CNAME[c]} 묶음 이름"><span class="members" id="members-${c}"></span>`;
+    groupsEl.appendChild(g);
+    const inp = g.querySelector('input');
+    inp.value = S.groups[c] || '';
+    inp.addEventListener('input', () => { S.groups[c] = inp.value; persist(); });
+  }
+
+  [['who-id','id'],['who-name','name'],['who-team','team']].forEach(([elId, k]) => {
+    const el = document.getElementById(elId);
+    el.value = S.who[k] || '';
+    el.addEventListener('input', () => { S.who[k] = el.value; persist(); });
+  });
+  const reflect = $('#reflect');
+  reflect.value = S.reflect || '';
+  reflect.addEventListener('input', () => { S.reflect = reflect.value; persist(); });
+
+  document.querySelectorAll('.sw').forEach(b => b.addEventListener('click', () => {
+    const c = +b.dataset.c;
+    if (c) S.color[S.active] = c; else delete S.color[S.active];
+    persist(); refresh();
+  }));
+  $('#erase').addEventListener('click', () => { delete S.boxes[S.active]; persist(); refresh(); });
+
+  function counts() {
+    $('#n-pred').textContent = PH.filter(p => (S.pred[p.id].size || '').trim() || (S.pred[p.id].time || '').trim()).length;
+    $('#n-box').textContent = Object.keys(S.boxes).length;
+  }
+
+  let draftEl = null, hx = null, hy = null;
+  function renderSVG() {
+    G = geom(svg.parentElement.clientWidth);
+    svg.setAttribute('viewBox', `0 0 ${G.W} ${G.H}`);
+    svg.innerHTML = build(VARS, {boxes:S.boxes, color:S.color, active:S.active, showRef:S.showRef, example:true}) +
+      `<path id="hx" d="" stroke="var(--accent)" stroke-width="0.8" opacity="0.6" fill="none" pointer-events="none"/>` +
+      `<path id="hy" d="" stroke="var(--accent)" stroke-width="0.8" opacity="0.6" fill="none" pointer-events="none"/>` +
+      `<rect id="draft" x="0" y="0" width="0" height="0" rx="3" fill="var(--accent)" fill-opacity="0.15" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 3" visibility="hidden" pointer-events="none"/>`;
+    draftEl = svg.querySelector('#draft'); hx = svg.querySelector('#hx'); hy = svg.querySelector('#hy');
+  }
+
+  function refresh() {
+    renderSVG(); counts();
+    const p = PH[S.active - 1];
+    $('#act-name').textContent = `${CIRC[p.id]} ${p.name}`;
+    $('#act-range').textContent = S.boxes[p.id] ? fmtBox(S.boxes[p.id]) : '아직 그리지 않음';
+    $('#erase').disabled = !S.boxes[p.id];
+    document.querySelectorAll('.sw').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.c === (S.color[p.id] || 0))));
+    picker.querySelectorAll('.chip').forEach(ch => {
+      const id = +ch.dataset.id;
+      ch.setAttribute('aria-pressed', String(id === S.active));
+      ch.classList.toggle('is-drawn', !!S.boxes[id]);
+      ch.style.setProperty('--dot', S.color[id] ? `var(--p${S.color[id]})` : 'var(--ink-2)');
+    });
+    for (let c = 1; c <= 4; c++) {
+      const m = PH.filter(q => S.color[q.id] === c).map(q => CIRC[q.id]).join(' ');
+      document.getElementById('members-' + c).textContent = m || '아직 없음';
+    }
+    const t = $('#ref-toggle');
+    t.setAttribute('aria-pressed', String(!!S.showRef));
+    t.textContent = S.showRef ? '보기 그림 범위 숨기기' : '보기 그림 범위 겹쳐 보기';
+    $('#refpanel').hidden = !S.showRef;
+    const touchTip = COARSE ? ' 격자 위를 누르는 동안에는 화면이 움직이지 않으니, 격자 바깥을 밀어 움직이세요. 휴대폰을 가로로 돌리면 격자가 커집니다.' : '';
+    $('#svg-note').textContent = (S.showRef
+      ? '보라색 점선 상자와 위쪽 띠가 보기 그림의 범위와 규모 구분입니다(어림값). ⑧⑨⑩ 상자는 격자 위로 더 이어집니다.'
+      : (Object.keys(S.boxes).length ? '점선은 1분·1시간·1일·1주일·1개월 자리입니다.' : '점선은 1분·1시간·1일·1주일·1개월 자리입니다. 회색 점선 상자는 그리는 방법을 보여 주는 예시이며, 첫 상자를 그리면 사라집니다.')) + touchTip;
+  }
+
+  // ---------- drawing ----------
+  const readout = $('#readout');
+  const DEFAULT_READ = COARSE
+    ? '격자 위를 손가락으로 끌어 상자를 그리세요. 끄는 동안 범위를 읽어 줍니다.'
+    : '격자 위에 커서를 올리면 그 자리의 크기와 시간을 읽어 줍니다.';
+  readout.textContent = DEFAULT_READ;
+  const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const m = svg.getScreenCTM(); return m ? pt.matrixTransform(m.inverse()) : null; };
+  const inside = p => p && p.x >= G.X0 && p.x <= G.XR && p.y >= G.YT && p.y <= G.YB;
+  const toLog = p => ({
+    lx: Math.min(LXMAX, Math.max(LXMIN, (p.x - G.X0) / G.DX + LXMIN)),
+    ly: Math.min(LYMAX, Math.max(LYMIN, LYMAX - (p.y - G.YT) / G.DY))
+  });
+  let drag = null;
+  const norm = (a, b) => ({x1:Math.min(a.lx, b.lx), x2:Math.max(a.lx, b.lx), y1:Math.min(a.ly, b.ly), y2:Math.max(a.ly, b.ly)});
+  function showDraft(b) {
+    const x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
+    draftEl.setAttribute('x', x1); draftEl.setAttribute('y', y1);
+    draftEl.setAttribute('width', Math.max(0, x2 - x1)); draftEl.setAttribute('height', Math.max(0, y2 - y1));
+    draftEl.setAttribute('visibility', 'visible');
+  }
+  function hover(p) {
+    if (!inside(p)) { hx.setAttribute('d', ''); hy.setAttribute('d', ''); if (!drag) readout.textContent = DEFAULT_READ; return; }
+    hx.setAttribute('d', `M${G.X0} ${p.y}H${G.XR}`); hy.setAttribute('d', `M${p.x} ${G.YT}V${G.YB}`);
+    if (drag) return;
+    const l = toLog(p);
+    readout.innerHTML = `크기 <b>약 ${esc(fmtLen(l.lx))}</b> · 지속 시간 <b>약 ${esc(fmtTime(l.ly))}</b>`;
+  }
+  svg.addEventListener('pointerdown', e => {
+    const p = toSvg(e);
+    if (!inside(p)) return;
+    e.preventDefault();
+    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+    drag = {a: toLog(p), id: S.active};
+  });
+  svg.addEventListener('pointermove', e => {
+    const p = toSvg(e);
+    if (drag) {
+      const b = norm(drag.a, toLog(p));
+      showDraft(b);
+      readout.innerHTML = `${CIRC[drag.id]} ${esc(PH[drag.id - 1].name)}: <b>${esc(fmtBox(b))}</b>`;
+    }
+    hover(p);
+  });
+  const finish = (e, cancel) => {
+    if (!drag) return;
+    const p = toSvg(e);
+    const b = norm(drag.a, toLog(p || {x:0, y:0}));
+    const id = drag.id;
+    drag = null;
+    if (draftEl) draftEl.setAttribute('visibility', 'hidden');
+    if (cancel) return;
+    if (b.x2 - b.x1 < 0.05 || b.y2 - b.y1 < 0.05) { readout.textContent = '조금 더 크게 끌어서 상자를 그려 보세요.'; return; }
+    S.boxes[id] = b;
+    const next = PH.find(q => !S.boxes[q.id] && q.id > id) || PH.find(q => !S.boxes[q.id]);
+    if (next) S.active = next.id;
+    persist(); refresh();
+    const nm = PH[id - 1].name, last = nm.charCodeAt(nm.length - 1) - 0xAC00;
+    const josa = last >= 0 && last < 11172 && last % 28 ? '을' : '를';
+    readout.innerHTML = `${CIRC[id]} ${esc(nm)}${josa} <b>${esc(fmtBox(b))}</b>로 그렸습니다.` + (next ? ` 다음은 ${CIRC[next.id]} ${esc(next.name)}입니다.` : ' 10개를 모두 그렸습니다.');
+  };
+  svg.addEventListener('pointerup', e => finish(e, false));
+  svg.addEventListener('pointercancel', e => finish(e, true));
+  svg.addEventListener('pointerleave', e => { if (!drag && e.pointerType !== 'touch') hover(null); });
+  let lastW = 0;
+  if (window.ResizeObserver) {
+    new ResizeObserver(() => {
+      const w = Math.round(svg.parentElement.clientWidth);
+      if (Math.abs(w - lastW) > 2 && !drag) { lastW = w; renderSVG(); }
+    }).observe(svg.parentElement);
+  }
+
+  // ---------- compare ----------
+  $('#ref-toggle').addEventListener('click', () => {
+    S.showRef = !S.showRef; persist(); refresh();
+    $('#ref-msg').textContent = S.showRef ? '2단계 격자에 보라색 점선으로 겹쳐 놓았습니다.' : '';
+  });
+
+  // ---------- export ----------
+  const msg = $('#export-msg');
+  function summary() {
+    const L = [];
+    L.push(`[시공간 규모 격자] 학번 ${S.who.id || '-'} / 이름 ${S.who.name || '-'} / 모둠 ${S.who.team || '-'}`);
+    L.push('');
+    PH.forEach(p => {
+      const q = S.pred[p.id], b = S.boxes[p.id];
+      L.push(`${CIRC[p.id]} ${p.name}`);
+      L.push(`  예상 크기: ${q.size || '-'} | 예상 지속 시간: ${q.time || '-'} | 근거: ${q.why || '-'}`);
+      L.push(`  격자 상자: ${b ? fmtBox(b) : '그리지 않음'}${S.color[p.id] ? ` | 묶음: ${CNAME[S.color[p.id]]}` : ''}`);
+    });
+    L.push('');
+    for (let c = 1; c <= 4; c++) {
+      const m = PH.filter(q => S.color[q.id] === c).map(q => CIRC[q.id]).join('');
+      if (m || S.groups[c]) L.push(`묶음(${CNAME[c]}) ${S.groups[c] || '이름 없음'}: ${m || '-'}`);
+    }
+    L.push('');
+    L.push(`가장 많이 달랐던 현상과 이유: ${S.reflect || '-'}`);
+    return L.join('\n');
+  }
+  $('#copy').addEventListener('click', () => {
+    const text = summary();
+    const fb = $('#fallback');
+    const fallback = () => { fb.hidden = false; fb.value = text; fb.focus(); fb.select(); msg.textContent = '아래 글을 선택해 두었습니다. Ctrl+C(⌘+C)로 복사하세요.'; };
+    try {
+      navigator.clipboard.writeText(text).then(() => { fb.hidden = true; msg.textContent = '결과를 복사했습니다.'; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  const EG = geom(760);
+  function exportSVG() {
+    const head = 44, W = EG.W, H = EG.H;
+    const who = `학번 ${S.who.id || '-'}  ·  이름 ${S.who.name || '-'}  ·  모둠 ${S.who.team || '-'}`;
+    const keep = G; G = EG;
+    const inner = build(LIGHT, {boxes:S.boxes, color:S.color, active:-1, showRef:S.showRef, example:false});
+    G = keep;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + head}" viewBox="0 0 ${W} ${H + head}">` +
+      `<rect width="${W}" height="${H + head}" fill="#ffffff"/>` +
+      `<text x="24" y="28" font-size="15" font-weight="600" fill="#16222a" font-family="${LIGHT.font}">${esc('시공간 규모 격자  ·  ' + who)}</text>` +
+      `<g transform="translate(0 ${head})">${inner}</g></svg>`;
+  }
+  const saveBtn = $('#save-png');
+  saveBtn.hidden = false;
+  saveBtn.addEventListener('click', () => {
+    msg.textContent = '';
+    const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(exportSVG());
+    const img = new Image();
+    img.onload = () => {
+      const scale = 2, cv = document.createElement('canvas');
+      cv.width = EG.W * scale; cv.height = (EG.H + 44) * scale;
+      const ctx = cv.getContext('2d');
+      ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
+      cv.toBlob(blob => {
+        if (!blob) { msg.textContent = '그림을 만들지 못했습니다. 글로 복사를 써 주세요.'; return; }
+        const name = `규모격자_${(S.who.name || '이름').replace(/[\\/:*?"<>|]/g, '')}.png`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        msg.textContent = '격자 그림을 저장했습니다. 휴대폰에서는 다운로드 폴더나 사진 앱을 확인하세요.';
+      }, 'image/png');
+    };
+    img.onerror = () => { msg.textContent = '그림을 만들지 못했습니다. 글로 복사를 써 주세요.'; };
+    img.src = src;
+  });
+
+  // ---------- reset ----------
+  const confirmBox = $('#confirm');
+  $('#reset').addEventListener('click', () => { confirmBox.hidden = false; $('#confirm-no').focus(); });
+  $('#confirm-no').addEventListener('click', () => { confirmBox.hidden = true; });
+  $('#confirm-yes').addEventListener('click', () => {
+    S = blank();
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => { el.value = ''; });
+    $('#fallback').hidden = true;
+    confirmBox.hidden = true; msg.textContent = '모두 지웠습니다.'; $('#ref-msg').textContent = '';
+    readout.textContent = DEFAULT_READ;
+    refresh();
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
