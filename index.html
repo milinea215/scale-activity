@@ -3,666 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="대기 현상 10가지의 크기와 지속 시간을 예상하고, 10배 눈금 로그 격자에 상자로 그린 뒤 보기 그림과 비교하는 활동">
-<title>시공간 규모 격자</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<meta name="description" content="기상 현상의 개념을 이미지로 학습하고, 공간 규모 및 지속 시간을 로그 격자에 배치해 비교하는 활동">
+<title>기상 현상의 시공간 규모 탐구</title>
 <style>
-/* Layout: a lab worksheet. Step 1 is a ruled ledger of predictions, step 2 a large log-log sheet to draw on, step 3 an overlay to compare. One column throughout; the ledger stacks on phones. */
-:root{
-  --paper:#eef2ef; --sheet:#ffffff; --ink:#16222a; --ink-2:#55646b; --line:#d3dcd8;
-  --rule:#e3e9e6; --rule-strong:#b9c5c1; --frame:#2e3d45;
-  --accent:#0b6475; --accent-soft:#dcecef; --on-accent:#ffffff;
-  --p1:#c63f37; --p2:#b67d0b; --p3:#2c8659; --p4:#3453a3;
-  --ref:#7b3a92; --ref-soft:rgba(123,58,146,.07); --example:#8b989e;
-  --font-display:"Hahmlet","Noto Serif KR","AppleMyungjo",serif;
-  --font-body:"IBM Plex Sans KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --font-data:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#0f1518; --sheet:#162026; --ink:#e4ebe8; --ink-2:#9ba9af; --line:#2b383e;
-    --rule:#212e34; --rule-strong:#3d4e55; --frame:#a8b7bc;
-    --accent:#5cb8c9; --accent-soft:#16343b; --on-accent:#0b1a1e;
-    --p1:#ef6f63; --p2:#e2b04b; --p3:#5fc28f; --p4:#819de4;
-    --ref:#cf95e6; --ref-soft:rgba(207,149,230,.10); --example:#7e8c92;
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#0f1518; --sheet:#162026; --ink:#e4ebe8; --ink-2:#9ba9af; --line:#2b383e;
-  --rule:#212e34; --rule-strong:#3d4e55; --frame:#a8b7bc;
-  --accent:#5cb8c9; --accent-soft:#16343b; --on-accent:#0b1a1e;
-  --p1:#ef6f63; --p2:#e2b04b; --p3:#5fc28f; --p4:#819de4;
-  --ref:#cf95e6; --ref-soft:rgba(207,149,230,.10); --example:#7e8c92;
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0}
-[hidden]{display:none!important}
-body{background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
-.wrap{max-width:1040px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:24px}
-h1,h2{font-family:var(--font-display);font-weight:700;line-height:1.25;text-wrap:balance;margin:0}
-h1{font-size:clamp(26px,4.2vw,36px);letter-spacing:-.01em}
-h2{font-size:21px}
-p{margin:0}
-.eyebrow{font-size:12.5px;font-weight:600;letter-spacing:.06em;color:var(--accent)}
-.lede{max-width:62ch;color:var(--ink-2)}
-.mast{display:grid;gap:10px;padding-block:4px 0}
-.ident{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:6px}
-.ident label{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--ink-2);white-space:nowrap}
-.ident input{width:9.5em}
-.status-line{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.pill{font-family:var(--font-data);font-size:12.5px;border:1px solid var(--line);background:var(--sheet);padding:2px 10px;border-radius:999px;color:var(--ink-2);font-variant-numeric:tabular-nums}
-.pill b{color:var(--ink);font-weight:500}
-
-input[type="text"],textarea{font:inherit;color:var(--ink);background:transparent;border:0;border-bottom:1px solid var(--rule-strong);padding:5px 2px;min-width:0;width:100%;border-radius:0}
-textarea{border:1px solid var(--rule-strong);border-radius:4px;padding:8px 10px;resize:vertical;min-height:84px}
-input[type="text"]:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 1px 0 0 var(--accent)}
-textarea:focus{box-shadow:0 0 0 1px var(--accent)}
-input::placeholder,textarea::placeholder{color:var(--ink-2);opacity:.75}
-button{font:inherit;color:inherit;cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-
-.step{background:var(--sheet);border:1px solid var(--line);border-radius:6px;padding-block:22px;padding-inline:clamp(16px,3vw,28px);display:grid;gap:16px;min-width:0}
-.step-head{display:flex;gap:14px;align-items:flex-start}
-.step-no{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1;color:var(--accent);min-width:1ch}
-.step-sub{font-size:13px;color:var(--ink-2);margin-top:2px}
-.note{font-size:13.5px;color:var(--ink-2);max-width:70ch}
-
-.scales{display:grid;gap:8px}
-.scale-row{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline}
-.scale-row > span:first-child{font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--ink-2);min-width:5.5em}
-.tick{font-size:13px;border:1px dashed var(--rule-strong);border-radius:4px;padding:1px 8px;white-space:nowrap}
-.tick em{font-style:normal;font-family:var(--font-data);font-size:12.5px;color:var(--accent)}
-
-.ledger{display:grid;border-top:2px solid var(--frame)}
-.lrow{display:grid;grid-template-columns:minmax(170px,1.15fr) 1fr 1fr 1.35fr;gap:4px 16px;padding-block:9px;border-bottom:1px solid var(--line);align-items:end}
-.lhead{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--ink-2);align-items:center;padding-block:8px}
-.pname{display:grid;gap:0;min-width:0}
-.pname b{font-weight:600;font-size:15px}
-.pname small{font-size:12px;color:var(--ink-2);line-height:1.45}
-.num{font-family:var(--font-data);color:var(--accent);margin-right:4px}
-.cell-label{display:none;font-size:11.5px;color:var(--ink-2)}
-.lrow > label{min-width:0;display:grid}
-.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (max-width:760px){
-  .lhead{display:none}
-  .lrow{grid-template-columns:1fr 1fr;gap:6px 14px}
-  .pname{grid-column:1 / -1}
-  .lrow > label.why{grid-column:1 / -1}
-  .cell-label{display:block}
-}
-
-.picker{display:flex;flex-wrap:wrap;gap:6px}
-.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:5px 12px 5px 9px;font-size:14px;line-height:1.3}
-.chip .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--dot,var(--ink-2));background:transparent;flex:none}
-.chip.is-drawn .dot{background:var(--dot,var(--ink-2))}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--sheet);border-color:var(--ink)}
-.chip[aria-pressed="true"] .dot{border-color:var(--sheet)}
-
-.toolbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper)}
-.toolbar .now{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;min-width:0}
-.toolbar .now strong{font-weight:600}
-.range{font-family:var(--font-data);font-size:13px;color:var(--ink-2)}
-.swatches{display:flex;gap:6px;align-items:center}
-.swatches > span{font-size:12.5px;color:var(--ink-2);margin-right:2px}
-.sw{width:24px;height:24px;border-radius:50%;border:2px solid var(--sheet);box-shadow:0 0 0 1px var(--line);background:var(--sw)}
-.sw[data-c="0"]{background:repeating-linear-gradient(45deg,var(--sheet) 0 3px,var(--line) 3px 5px)}
-.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
-.btn{border:1px solid var(--frame);background:transparent;border-radius:6px;padding:7px 14px;font-size:14px;font-weight:500}
-.btn:hover{background:var(--accent-soft)}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.btn-primary:hover{background:var(--accent);filter:brightness(1.08)}
-.btn-quiet{border-color:var(--line);color:var(--ink-2)}
-.btn[aria-pressed="true"]{background:var(--ref);border-color:var(--ref);color:var(--sheet)}
-
-.sheetbox{border:1px solid var(--line);border-radius:6px;overflow:hidden}
-.readout{font-family:var(--font-data);font-size:13px;padding:8px 12px;border-bottom:1px solid var(--line);min-height:2.4em;color:var(--ink-2);font-variant-numeric:tabular-nums;background:var(--paper)}
-.readout b{color:var(--ink);font-weight:500}
-svg#grid{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair;background:var(--sheet)}
-.svg-note{font-size:12px;color:var(--ink-2);padding:6px 12px;border-top:1px solid var(--line)}
-
-.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 18px}
-.group{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center}
-.group .gs{width:14px;height:14px;border-radius:50%;background:var(--sw)}
-.group .members{grid-column:2;font-size:12.5px;color:var(--ink-2);min-height:1.4em}
-
-.refpanel{display:grid;gap:10px}
-.tablewrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:520px}
-th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--ink-2);border-bottom:2px solid var(--frame)}
-td.mono{font-family:var(--font-data);font-size:12.5px;white-space:nowrap}
-.reflect{display:grid;gap:6px;font-size:14px}
-.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.msg{font-size:13px;color:var(--accent)}
-.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13.5px;padding:8px 12px;border:1px solid var(--p1);border-radius:6px}
-.fallback{width:100%;min-height:160px;font-family:var(--font-data);font-size:12.5px}
-footer{font-size:12px;color:var(--ink-2);max-width:70ch}
-@media (max-width:560px){
-  .step{padding-inline:12px}
-  .sheetbox{margin-inline:-6px}
-  .readout{font-size:12.5px;padding-inline:10px}
-  .toolbar{padding:10px}
-}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+:root{--bg:#edf1ef;--panel:#fff;--ink:#142932;--muted:#50636d;--line:#d4dedc;--strong:#aebcba;--accent:#126a78;--accent-light:#dcecee;--row:#f5f8f7;--red:#c44b4a;--amber:#c39330;--green:#358665;--blue:#4367ab;--violet:#8d50a0;--font:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--font)}[hidden]{display:none!important}
+button,input,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.38;cursor:not-allowed}a{color:inherit}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #57acb9;outline-offset:2px}
+.wrap{max-width:1040px;padding:26px 17px 70px;margin:auto;display:grid;gap:24px}.mast{display:grid;gap:9px;padding:7px 5px}.eyebrow{font-size:12px;font-weight:750;letter-spacing:.05em;color:var(--accent)}h1,h2,h3,p{margin:0}h1{font-size:clamp(24px,4vw,37px);line-height:1.3;letter-spacing:-.02em}h2{font-size:21px;letter-spacing:-.01em}h3{font-size:17px}.lede{max-width:70ch;color:var(--muted)}
+.identity{display:flex;gap:12px 22px;flex-wrap:wrap;margin-top:4px}.identity label{display:flex;gap:7px;align-items:baseline;font-size:13px;color:var(--muted)}.identity input{width:118px;min-width:0;border:0;border-bottom:1px solid var(--strong);background:transparent;padding:4px;color:var(--ink)}.progress{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.pill{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--panel);padding:3px 10px;color:var(--muted);font-size:12px}.pill strong{margin-left:4px;color:var(--ink)}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:clamp(15px,3vw,28px);display:grid;gap:17px;min-width:0}.step-head{display:flex;gap:14px;align-items:start}.step-index{font-size:30px;line-height:1.05;color:var(--accent);font-weight:800}.step-sub,.note{color:var(--muted);font-size:13.5px}.step-sub{margin-top:3px}.note{max-width:81ch}
+.concepts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.concept{border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--panel);min-width:0}.art{display:block;width:100%;height:auto;aspect-ratio:320/164;border-bottom:1px solid var(--line);background:#e8f3f8}.concept-copy{padding:13px 14px 16px;display:grid;gap:6px}.concept-copy p{color:var(--muted);font-size:13.5px;line-height:1.7}.concept-copy .observe{border-left:3px solid var(--accent);color:var(--ink);padding-left:9px;margin-top:4px}.concept-copy .num{color:var(--accent);font-weight:750;margin-right:5px}.btn{border:1px solid #38565e;border-radius:6px;padding:7px 13px;background:var(--panel);font-size:13.5px;font-weight:600;color:var(--ink)}.btn:hover:not(:disabled){background:var(--row)}.btn-primary{background:var(--accent);border-color:var(--accent);color:white}.btn-primary:hover:not(:disabled){background:#0d5764}.btn-quiet{border-color:var(--line)}.btn[aria-pressed="true"]{background:var(--violet);color:white;border-color:var(--violet)}.jump{display:inline-flex;justify-content:center;align-items:center;text-decoration:none;width:max-content;max-width:100%}
+.scales{display:grid;gap:8px;background:var(--row);border:1px solid var(--line);border-radius:7px;padding:12px}.scale-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}.scale-row>strong{min-width:80px;color:var(--muted);font-size:12px}.tick{border:1px dashed var(--strong);border-radius:4px;padding:0 7px;font-size:12px;white-space:nowrap}.tick em{font-style:normal;color:var(--accent);font-weight:750}
+.picker{display:flex;flex-wrap:wrap;gap:7px}.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid var(--line);border-radius:100px;background:var(--panel);font-size:13.5px;line-height:1.4}.dot{width:9px;height:9px;border:1.5px solid var(--strong);border-radius:50%;flex:none}.chip.done .dot{background:var(--dot);border-color:var(--dot)}.chip[aria-pressed="true"]{background:var(--ink);color:white;border-color:var(--ink)}.chip[aria-pressed="true"] .dot{border-color:white}
+.controls{display:flex;gap:9px 10px;align-items:center;flex-wrap:wrap;padding:12px;border:1px solid var(--line);border-radius:7px;background:var(--row)}.controls .selected{flex:1 1 270px;min-width:0}.selected strong{margin:0 6px}.selected small{display:block;color:var(--muted);line-height:1.5}.swatches{display:flex;gap:6px;align-items:center}.swatches>span{font-size:12px;color:var(--muted);margin-right:2px}.sw{width:25px;height:25px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);background:var(--sw)}.sw[data-color="0"]{background:repeating-linear-gradient(45deg,var(--panel) 0 4px,var(--strong) 4px 5px)}.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}.edit-help{font-size:13px;color:var(--accent);font-weight:600;min-height:1.5em}
+.gridframe{border:1px solid var(--line);border-radius:7px;overflow:hidden}.readout{padding:8px 11px;border-bottom:1px solid var(--line);background:var(--row);font-size:13px;color:var(--muted);min-height:2.7em}.readout strong{color:var(--ink)}.gridscroll{overflow-x:auto;overscroll-behavior-x:contain}#grid{display:block;width:100%;min-width:610px;height:auto;touch-action:none;user-select:none;cursor:crosshair;background:white}.grid-tip{padding:7px 11px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}.boxhit{cursor:move}.handle{cursor:nwse-resize}.handle[data-handle="ne"],.handle[data-handle="sw"]{cursor:nesw-resize}
+.group-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px 18px}.group{display:grid;grid-template-columns:14px 1fr;column-gap:9px;align-items:center}.marker{width:13px;height:13px;border-radius:50%;background:var(--marker)}.group input{width:100%;min-width:0;border:0;border-bottom:1px solid var(--strong);padding:6px 2px;color:var(--ink)}.group small{grid-column:2;color:var(--muted);font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.status{color:var(--accent);font-size:12.5px}.table-wrap{overflow-x:auto}table{width:100%;min-width:520px;border-collapse:collapse;font-size:13px}th,td{padding:8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);border-bottom:2px solid var(--strong)}.mono{font-variant-numeric:tabular-nums}.reflection{display:grid;gap:7px;font-size:14px}textarea{width:100%;min-height:85px;border:1px solid var(--strong);border-radius:5px;padding:9px 10px;resize:vertical;color:var(--ink);background:var(--panel)}.confirm{border:1px solid var(--red);padding:10px;border-radius:6px;display:flex;gap:9px;flex-wrap:wrap;align-items:center;font-size:13px}footer{color:var(--muted);font-size:12px}
+@media(max-width:690px){.concepts,.group-grid{grid-template-columns:1fr}.wrap{padding-inline:11px}.step{padding:15px 12px}.step-head{gap:10px}.gridframe{margin-inline:-7px}#grid{min-width:610px}.identity{gap:8px 13px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-
-<div class="wrap">
-  <header class="mast">
-    <p class="eyebrow">과학과교육2(지구과학) · 7주차 · 시간 규모와 공간 규모</p>
-    <h1>크기와 지속 시간, 예상하고 배치하기</h1>
-    <p class="lede">대기 현상 10가지가 얼마나 크고 얼마나 오래 가는지 어림한 뒤, 가로·세로 모두 한 칸이 10배인 격자 위에 상자로 그려 봅니다.</p>
-    <div class="ident">
-      <label for="who-id">학번 <input type="text" id="who-id" autocomplete="off"></label>
-      <label for="who-name">이름 <input type="text" id="who-name" autocomplete="off"></label>
-      <label for="who-team">모둠 <input type="text" id="who-team" autocomplete="off"></label>
-    </div>
-    <div class="status-line">
-      <span class="pill">예상 <b id="n-pred">0</b>/10</span>
-      <span class="pill">배치 <b id="n-box">0</b>/10</span>
-    </div>
-  </header>
-
-  <section class="step" id="step1" aria-labelledby="h-step1">
-    <div class="step-head"><span class="step-no" aria-hidden="true">1</span><div><h2 id="h-step1">예상하기</h2><p class="step-sub">개인 · 일상의 크기와 시간에 빗대어 어림합니다</p></div></div>
-    <div class="scales">
-      <div class="scale-row"><span>크기 기준</span>
-        <span class="tick">교실 <em>10 m</em></span><span class="tick">운동장 <em>100 m</em></span><span class="tick">집~학교 <em>1 km</em></span><span class="tick">시·군 <em>10 km</em></span><span class="tick">한반도 남북 <em>1,000 km</em></span><span class="tick">지구 둘레 <em>40,000 km</em></span>
-      </div>
-      <div class="scale-row"><span>시간 기준</span>
-        <span class="tick">1분 <em>60초</em></span><span class="tick">1시간 <em>3,600초</em></span><span class="tick">1일 <em>86,400초</em></span><span class="tick">1주일 <em>604,800초</em></span><span class="tick">1년 <em>약 31,500,000초</em></span>
-      </div>
-    </div>
-    <p class="note">모두 어림값입니다. 정확한 값보다 자릿수가 중요합니다. 수 m인지, 수십 km인지, 수천 km인지를 먼저 정해 보세요.</p>
-    <div class="ledger" id="ledger">
-      <div class="lrow lhead" aria-hidden="true"><span>현상</span><span>크기 예상 (무엇만 한가?)</span><span>지속 시간 예상 (얼마나 가나?)</span><span>그렇게 생각한 근거</span></div>
-    </div>
-  </section>
-
-  <section class="step" id="step2" aria-labelledby="h-step2">
-    <div class="step-head"><span class="step-no" aria-hidden="true">2</span><div><h2 id="h-step2">배치하기</h2><p class="step-sub">모둠 · 예상한 범위를 격자 위에 상자로 그립니다</p></div></div>
-    <p class="note">현상을 고른 뒤 격자 위에서 끌어 상자를 그립니다. 가로 폭은 크기의 범위, 세로 높이는 지속 시간의 범위입니다. 다시 끌면 고쳐 그려지고, 다 그리면 다음 현상으로 넘어갑니다.</p>
-    <div class="picker" id="picker" role="group" aria-label="그릴 현상 고르기"></div>
-    <div class="toolbar">
-      <div class="now"><span>지금 그리는 현상</span><strong id="act-name"></strong><span class="range" id="act-range"></span></div>
-      <div class="swatches" role="group" aria-label="묶음 색">
-        <span>묶음 색</span>
-        <button class="sw" data-c="0" aria-label="색 없음" aria-pressed="true" type="button"></button>
-        <button class="sw" data-c="1" style="--sw:var(--p1)" aria-label="빨강" aria-pressed="false" type="button"></button>
-        <button class="sw" data-c="2" style="--sw:var(--p2)" aria-label="노랑" aria-pressed="false" type="button"></button>
-        <button class="sw" data-c="3" style="--sw:var(--p3)" aria-label="초록" aria-pressed="false" type="button"></button>
-        <button class="sw" data-c="4" style="--sw:var(--p4)" aria-label="파랑" aria-pressed="false" type="button"></button>
-      </div>
-      <button class="btn btn-quiet" id="erase" type="button">이 상자 지우기</button>
-    </div>
-    <div class="sheetbox">
-      <div class="readout" id="readout">격자 위에 커서를 올리면 그 자리의 크기와 시간을 읽어 줍니다.</div>
-      <svg id="grid" viewBox="0 0 760 458" role="img" aria-label="공간 규모와 시간 규모의 로그 격자. 가로는 0.001 km에서 40,000 km, 세로는 1초에서 10,000,000초"></svg>
-      <p class="svg-note" id="svg-note">점선은 1분·1시간·1일·1주일·1개월 자리입니다. 회색 점선 상자는 그리는 방법을 보여 주는 예시이며, 첫 상자를 그리면 사라집니다.</p>
-    </div>
-    <div>
-      <p class="note" style="margin-bottom:8px">가까이 모인 현상끼리 같은 색으로 칠하고, 묶음마다 이름을 붙여 보세요.</p>
-      <div class="groups" id="groups"></div>
-    </div>
-  </section>
-
-  <section class="step" id="step3" aria-labelledby="h-step3">
-    <div class="step-head"><span class="step-no" aria-hidden="true">3</span><div><h2 id="h-step3">비교하기</h2><p class="step-sub">전체 · 모둠 비교를 마친 뒤 보기 그림의 범위를 겹쳐 봅니다</p></div></div>
-    <div class="actions">
-      <button class="btn" id="ref-toggle" type="button" aria-pressed="false">보기 그림 범위 겹쳐 보기</button>
-      <span class="msg" id="ref-msg" role="status"></span>
-    </div>
-    <div class="refpanel" id="refpanel" hidden>
-      <div class="tablewrap">
-        <table>
-          <thead><tr><th>규모 구분</th><th>현상</th><th>공간 규모</th><th>시간 규모</th></tr></thead>
-          <tbody>
-            <tr><td>미규모</td><td>① 난류</td><td class="mono">약 1 m ~ 100 m</td><td class="mono">약 1초 ~ 100초</td></tr>
-            <tr><td>미규모</td><td>② 토네이도</td><td class="mono">약 100 m ~ 1 km</td><td class="mono">약 100초 ~ 10⁴초</td></tr>
-            <tr><td>중간규모</td><td>③ 해륙풍 ④ 산곡풍 ⑤ 뇌우</td><td class="mono">약 1 ~ 100 km</td><td class="mono">약 10⁴초 ~ 1일</td></tr>
-            <tr><td>종관규모</td><td>⑥ 태풍</td><td class="mono">약 100 ~ 500 km</td><td class="mono">약 1일 ~ 1주일</td></tr>
-            <tr><td>종관규모</td><td>⑦ 고기압·저기압</td><td class="mono">약 500 ~ 3,000 km</td><td class="mono">약 1일 ~ 1주일</td></tr>
-            <tr><td>지구규모</td><td>⑧ 편서풍 파동 ⑨ 계절풍 ⑩ 대기 대순환</td><td class="mono">약 3,000 ~ 40,000 km</td><td class="mono">1주일 이상</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="note">보기 그림에서 읽은 어림값입니다. 규모 구분의 경계는 문헌마다 다르고, 실제 태풍처럼 그림의 범위보다 클 수 있는 현상도 있습니다. 정확한 값보다 자릿수와 순서가 맞는지를 보세요.</p>
-    </div>
-    <label class="reflect" for="reflect">내 상자와 가장 많이 달랐던 현상은 무엇인가요? 왜 그렇게 예상했나요?
-      <textarea id="reflect"></textarea>
-    </label>
-    <div class="actions">
-      <button class="btn btn-primary" id="copy" type="button">결과를 글로 복사</button>
-      <button class="btn" id="save-png" type="button" hidden>격자 그림 저장 (PNG)</button>
-      <button class="btn btn-quiet" id="reset" type="button">모두 지우기</button>
-      <span class="msg" id="export-msg" role="status"></span>
-    </div>
-    <div class="confirm" id="confirm" hidden>
-      <span>예상, 상자, 묶음, 생각을 모두 지웁니다.</span>
-      <button class="btn" id="confirm-yes" type="button">지우기</button>
-      <button class="btn btn-quiet" id="confirm-no" type="button">취소</button>
-    </div>
-    <textarea class="fallback" id="fallback" hidden aria-label="복사할 결과"></textarea>
-  </section>
-
-  <footer>입력한 내용은 이 브라우저에만 임시로 남습니다. 제출할 때는 글로 복사하거나 격자 그림을 저장해 쓰세요.</footer>
-</div>
-
+<main class="wrap">
+<header class="mast"><div class="eyebrow">과학과교육(지구과학) · 기상 현상의 시간 규모와 공간 규모</div><h1>기상 현상을 이해하고, 시공간 규모에 배치하기</h1><p class="lede">기상 현상의 원리를 개념도로 먼저 살펴보세요. 그런 다음 각 현상의 공간 규모와 지속 시간의 범위를 격자에 나타내고, 참고 범위와 비교합니다.</p>
+<div class="identity"><label>학번 <input id="who-id" type="text" autocomplete="off"></label><label>이름 <input id="who-name" type="text" autocomplete="off"></label><label>모둠 <input id="who-team" type="text" autocomplete="off"></label></div>
+<div class="progress"><span class="pill">1 개념 살펴보기</span><span class="pill">2 격자 배치하기</span><span class="pill">3 비교하기</span><span class="pill">배치 <strong id="nbox">0</strong>/10</span></div></header>
+<section class="step" id="concept-section" aria-labelledby="concept-title"><div class="step-head"><div class="step-index">1</div><div><h2 id="concept-title">기상 현상 살펴보기</h2><p class="step-sub">개인 활동 · 개념도와 설명을 읽으며 현상의 특징과 발생 원리를 이해합니다.</p></div></div><p class="note">그림은 개념을 돕기 위한 자체 제작 도해로, 실제 크기 비율을 나타내지 않습니다. 공간·시간 범위의 구체적인 값은 뒤의 비교 단계에서 확인할 수 있습니다.</p><div class="concepts" id="concepts"></div><a class="btn btn-primary jump" href="#activity-section">개념을 살펴본 뒤 격자 활동으로 이동</a></section>
+<section class="step" id="activity-section" aria-labelledby="activity-title"><div class="step-head"><div class="step-index">2</div><div><h2 id="activity-title">시공간 규모 격자 활동</h2><p class="step-sub">모둠 활동 · 현상이 나타나는 크기와 지속 시간의 범위를 상자로 나타냅니다.</p></div></div>
+<div class="scales"><div class="scale-row"><strong>크기 비교</strong><span class="tick">교실 <em>10 m</em></span><span class="tick">운동장 <em>100 m</em></span><span class="tick">집~학교 <em>1 km</em></span><span class="tick">한반도 남북 <em>약 1,000 km</em></span><span class="tick">지구 둘레 <em>약 40,000 km</em></span></div><div class="scale-row"><strong>시간 비교</strong><span class="tick">1분 <em>60초</em></span><span class="tick">1시간 <em>3,600초</em></span><span class="tick">1일 <em>86,400초</em></span><span class="tick">1주일 <em>604,800초</em></span></div></div>
+<p class="note">현상을 선택한 후 격자에서 드래그해 상자를 그리세요. 가로는 공간 규모, 세로는 지속 시간의 범위입니다. <strong>상자를 그려도 다음 현상으로 자동 이동하지 않습니다.</strong> 상자를 끌면 이동하고, 네 모서리를 끌면 크기가 조절됩니다. '상자 다시 그리기'로 처음부터 그릴 수도 있습니다.</p>
+<div id="picker" class="picker" role="group" aria-label="현상 선택"></div>
+<div class="controls"><div class="selected">선택: <strong id="active-name"></strong><small id="active-range"></small></div><div class="swatches" role="group" aria-label="상자 묶음 색"><span>묶음 색</span><button class="sw" data-color="0" aria-label="색 없음" aria-pressed="true" type="button"></button><button class="sw" data-color="1" style="--sw:var(--red)" aria-label="빨강" aria-pressed="false" type="button"></button><button class="sw" data-color="2" style="--sw:var(--amber)" aria-label="노랑" aria-pressed="false" type="button"></button><button class="sw" data-color="3" style="--sw:var(--green)" aria-label="초록" aria-pressed="false" type="button"></button><button class="sw" data-color="4" style="--sw:var(--blue)" aria-label="파랑" aria-pressed="false" type="button"></button></div><button class="btn" id="prev" type="button">이전 현상</button><button class="btn" id="next" type="button">다음 현상</button><button class="btn btn-quiet" id="redraw" type="button" aria-pressed="false">상자 다시 그리기</button><button class="btn btn-quiet" id="erase" type="button">상자 지우기</button></div>
+<p class="edit-help" id="edit-help" role="status"></p><div class="gridframe"><div class="readout" id="readout" role="status">격자 위에서 드래그하면 상자를 그릴 수 있습니다.</div><div class="gridscroll"><svg id="grid" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 462" role="img" aria-label="공간 규모와 시간 규모의 로그 격자, 가로는 0.001km에서 40,000km, 세로는 1초에서 10,000,000초"></svg></div><p class="grid-tip" id="grid-tip">점선은 1분, 1시간, 1일, 1주일, 1개월에 해당합니다. 작은 화면에서는 좌우로 스크롤해서 격자를 살펴보세요.</p></div>
+<div><p class="note" style="margin-bottom:8px">격자에서 서로 가까운 현상에 같은 색을 지정하고, 묶음의 이름을 적어 보세요.</p><div class="group-grid" id="groups"></div></div></section>
+<section class="step" id="compare-section" aria-labelledby="compare-title"><div class="step-head"><div class="step-index">3</div><div><h2 id="compare-title">배치 결과 비교하기</h2><p class="step-sub">모둠 토의 후 참고 범위를 표시하고 자신의 배치와 비교합니다.</p></div></div><div class="actions"><button class="btn" id="reference" type="button" aria-pressed="false">참고 범위 겹쳐 보기</button><span class="status" id="ref-status"></span></div><div id="reference-panel" hidden><div class="table-wrap"><table><thead><tr><th>규모 구분</th><th>현상</th><th>공간 규모 (예시)</th><th>지속 시간 (예시)</th></tr></thead><tbody><tr><td>미규모</td><td>① 난류</td><td>약 1~100 m</td><td>약 1~100초</td></tr><tr><td>미규모</td><td>② 토네이도</td><td>약 100 m~1 km</td><td>약 100~10,000초</td></tr><tr><td>중간규모</td><td>③ 해륙풍 ④ 산곡풍 ⑤ 뇌우</td><td>약 1~100 km</td><td>약 10,000초~1일</td></tr><tr><td>종관규모</td><td>⑥ 태풍</td><td>약 100~500 km</td><td>약 1일~1주일</td></tr><tr><td>종관규모</td><td>⑦ 고기압·저기압</td><td>약 500~3,000 km</td><td>약 1일~1주일</td></tr><tr><td>지구규모</td><td>⑧ 편서풍 파동 ⑨ 계절풍 ⑩ 대기 대순환</td><td>약 3,000~40,000 km</td><td>1주일 이상</td></tr></tbody></table></div><p class="note" style="margin-top:9px">이 값은 활동을 위한 대표적인 어림 범위입니다. 실제 현상의 정의, 측정 기준 및 문헌에 따라 규모가 달라질 수 있습니다. 특히 지구규모 현상의 지속 시간은 격자 위쪽 범위를 넘을 수 있습니다.</p></div>
+<label class="reflection" for="reflect">참고 범위와 비교했을 때 가장 크게 달랐던 현상은 무엇인가요? 그 차이가 생긴 이유를 설명해 보세요.<textarea id="reflect"></textarea></label><div class="actions"><button class="btn btn-primary" id="copy" type="button">결과 글로 복사</button><button class="btn" id="export" type="button">격자 그림 저장 (PNG)</button><button class="btn btn-quiet" id="reset" type="button">모두 지우기</button><span class="status" id="message" role="status"></span></div><div class="confirm" id="confirm" hidden><span>학번, 이름, 격자 상자, 분류 및 생각을 모두 지웁니다.</span><button class="btn" id="confirm-yes" type="button">지우기</button><button class="btn btn-quiet" id="confirm-no" type="button">취소</button></div><textarea id="fallback" hidden aria-label="복사 결과"></textarea></section>
+<footer>활동 결과는 현재 브라우저에 임시로 저장됩니다. 공용 기기에서는 활동 후 결과를 저장하고 입력 내용을 지워 주세요. 학습용 개념도는 독립적으로 제작한 그림입니다.</footer>
+</main>
 <script>
-(() => {
-  const PH = [
-    {id:1, name:'난류', hint:'굴뚝 연기가 소용돌이치며 흩어지는 모습, 비행기가 흔들리는 기류'},
-    {id:2, name:'토네이도', hint:'뇌우 구름 아래로 내려오는 깔때기 모양의 강한 회오리바람'},
-    {id:3, name:'해륙풍', hint:'바닷가에서 낮에는 바다 쪽에서, 밤에는 육지 쪽에서 부는 바람'},
-    {id:4, name:'산곡풍', hint:'낮에는 골짜기에서 산비탈로, 밤에는 산비탈에서 골짜기로 부는 바람'},
-    {id:5, name:'뇌우', hint:'번개·천둥을 동반한 여름 오후의 소나기구름'},
-    {id:6, name:'태풍', hint:'열대 바다에서 만들어져 우리나라로 올라오는 강한 열대저기압'},
-    {id:7, name:'고기압·저기압', hint:'일기도의 H·L, 날씨를 맑게 하거나 흐리게 하며 지나가는 기압'},
-    {id:8, name:'편서풍 파동', hint:'중위도 높은 하늘에서 남북으로 굽이치며 지구를 도는 서풍의 물결'},
-    {id:9, name:'계절풍', hint:'우리나라에서 겨울에는 북서풍, 여름에는 남동풍이 주로 부는 것'},
-    {id:10, name:'대기 대순환', hint:'적도에서 극까지 이어지는 지구 전체의 바람 띠(무역풍·편서풍·극동풍)'}
-  ];
-  const CIRC = ['', '①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
-  const CNAME = ['색 없음','빨강','노랑','초록','파랑'];
-  const KEY = 'scale-grid-activity-v1';
-  const COARSE = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
-
-  // Geometry of the log-log sheet. The viewBox follows the sheet's real pixel width, so labels stay legible on phones.
-  const LXMIN = -3, LXMAX = Math.log10(40000), LYMIN = 0, LYMAX = 7;
-  const lg = Math.log10;
-  function geom(w) {
-    const W = Math.round(Math.max(300, Math.min(760, w || 760)));
-    const compact = W < 560;
-    const X0 = compact ? 48 : 112, RIGHT = compact ? 38 : 86, YT = 46, DY = compact ? 46 : 47;
-    const DX = (W - X0 - RIGHT) / (LXMAX - LXMIN), YB = YT + (LYMAX - LYMIN) * DY;
-    return {W, H: Math.round(YB + (compact ? 72 : 83)), X0, DX, YT, DY, YB, XR: X0 + (LXMAX - LXMIN) * DX, compact};
-  }
-  let G = geom(760);
-  const X = lx => G.X0 + (lx - LXMIN) * G.DX;
-  const Y = ly => G.YT + (LYMAX - ly) * G.DY;
-
-  const REF = [
-    {label:'①', x:[0.001,0.1], y:[1,100]},
-    {label:'②', x:[0.1,1], y:[100,1e4]},
-    {label:'③④⑤', x:[1,100], y:[1e4,86400]},
-    {label:'⑥', x:[100,500], y:[86400,604800]},
-    {label:'⑦', x:[500,3000], y:[86400,604800]},
-    {label:'⑧⑨⑩ ↑', x:[3000,40000], y:[604800,1e7]}
-  ];
-  const BANDS = [
-    {name:'미규모', short:'미', x:[0.001,1]}, {name:'중간규모', short:'중간', x:[1,100]},
-    {name:'종관규모', short:'종관', x:[100,3000]}, {name:'지구규모', short:'지구', x:[3000,40000]}
-  ];
-  const EXAMPLE = {x1:lg(0.1), x2:lg(10), y1:lg(3600), y2:lg(18000)};
-
-  const blank = () => ({
-    who:{id:'', name:'', team:''},
-    pred:Object.fromEntries(PH.map(p => [p.id, {size:'', time:'', why:''}])),
-    boxes:{}, color:{}, groups:['', '', '', '', ''], reflect:'', active:1, showRef:false
-  });
-  let S = blank();
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) { const d = JSON.parse(raw); S = Object.assign(blank(), d); S.pred = Object.assign(blank().pred, d.pred || {}); }
-  } catch (e) { /* storage unavailable: start fresh */ }
-  let saveTimer = null;
-  const persist = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 250); };
-
-  // ---------- formatting ----------
-  const nice = x => {
-    if (x >= 10) { const p = 10 ** (Math.floor(lg(x)) - 1); return (Math.round(x / p) * p).toLocaleString('ko-KR'); }
-    return (Math.round(x * 10) / 10).toLocaleString('ko-KR');
-  };
-  const fmtLen = l => { const km = 10 ** l; return km < 1 ? nice(Math.max(1, km * 1000)) + ' m' : nice(km) + ' km'; };
-  const fmtTime = l => {
-    const s = 10 ** l;
-    if (s < 60) return nice(Math.max(1, s)) + '초';
-    if (s < 3600) return nice(s / 60) + '분';
-    if (s < 86400) return nice(s / 3600) + '시간';
-    if (s < 604800) return nice(s / 86400) + '일';
-    if (s < 2592000) return nice(s / 604800) + '주';
-    return nice(s / 2592000) + '개월';
-  };
-  const fmtBox = b => `약 ${fmtLen(b.x1)}~${fmtLen(b.x2)} · 약 ${fmtTime(b.y1)}~${fmtTime(b.y2)}`;
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-  // ---------- SVG builder (shared by screen and PNG export) ----------
-  const VARS = {
-    sheet:'var(--sheet)', ink:'var(--ink)', ink2:'var(--ink-2)', rule:'var(--rule)', ruleStrong:'var(--rule-strong)',
-    frame:'var(--frame)', accent:'var(--accent)', ref:'var(--ref)', refSoft:'var(--ref-soft)', example:'var(--example)',
-    p:['var(--accent)','var(--p1)','var(--p2)','var(--p3)','var(--p4)'],
-    font:"'IBM Plex Sans KR','Noto Sans KR',sans-serif", mono:"'IBM Plex Mono',ui-monospace,monospace"
-  };
-  const LIGHT = {
-    sheet:'#ffffff', ink:'#16222a', ink2:'#55646b', rule:'#e3e9e6', ruleStrong:'#b9c5c1', frame:'#2e3d45',
-    accent:'#0b6475', ref:'#7b3a92', refSoft:'rgba(123,58,146,.07)', example:'#8b989e',
-    p:['#0b6475','#c63f37','#b67d0b','#2c8659','#3453a3'],
-    font:"'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif", mono:'Menlo,Consolas,monospace'
-  };
-  const minorX = [], minorY = [];
-  for (let e = -3; e <= 4; e++) for (let k = 2; k <= 9; k++) { const v = k * 10 ** e; if (lg(v) < LXMAX) minorX.push(lg(v)); }
-  for (let e = 0; e <= 6; e++) for (let k = 2; k <= 9; k++) minorY.push(e + lg(k));
-  const majorX = [-3,-2,-1,0,1,2,3,4], majorY = [0,1,2,3,4,5,6,7];
-  // [value, full label, compact label]
-  const XTICK = [[0.001,'0.001','0.001'],[0.01,'0.01','0.01'],[0.1,'0.1','0.1'],[1,'1','1'],[10,'10','10'],[100,'100','100'],[1000,'1,000','1천'],[10000,'10,000','1만'],[40000,'40,000','4만']];
-  const XSUB = [[0.001,'(1 m)'],[0.01,'(10 m)'],[0.1,'(100 m)'],[40000,'(지구 둘레)']];
-  const XSUB_C = [[0.001,'(1 m)'],[40000,'(지구 둘레)']];
-  const YLAB_C = ['1','10','100','1천','1만','10만','100만','1천만'];
-  const MARKS = [[60,'1분','1분'],[3600,'1시간','1시간'],[86400,'1일','1일'],[604800,'1주일','1주'],[2592000,'1개월','1달']];
-
-  function build(P, opt) {
-    const g = G, c = g.compact, o = [];
-    const vline = l => `M${X(l).toFixed(2)} ${g.YT}V${g.YB}`, hline = l => `M${g.X0} ${Y(l).toFixed(2)}H${g.XR.toFixed(2)}`;
-    o.push(`<rect x="0" y="0" width="${g.W}" height="${g.H}" fill="${P.sheet}"/>`);
-    o.push(`<path d="${minorX.map(vline).join('')}${minorY.map(hline).join('')}" stroke="${P.rule}" stroke-width="0.6" fill="none"/>`);
-    o.push(`<path d="${majorX.map(vline).join('')}${majorY.map(hline).join('')}" stroke="${P.ruleStrong}" stroke-width="1" fill="none"/>`);
-    o.push(`<path d="${MARKS.map(([s]) => `M${g.X0} ${Y(lg(s)).toFixed(2)}H${(g.XR + 4).toFixed(2)}`).join('')}" stroke="${P.ink2}" stroke-width="0.9" stroke-dasharray="4 4" fill="none" opacity="0.8"/>`);
-    o.push(`<rect x="${g.X0}" y="${g.YT}" width="${(g.XR - g.X0).toFixed(2)}" height="${g.YB - g.YT}" fill="none" stroke="${P.frame}" stroke-width="1.3"/>`);
-    const T = (x, y, s, a = {}) => `<text x="${(+x).toFixed(2)}" y="${(+y).toFixed(2)}" font-size="${a.size || 13}" fill="${a.fill || P.ink}" font-family="${a.mono ? P.mono : P.font}"${a.anchor ? ` text-anchor="${a.anchor}"` : ''}${a.weight ? ` font-weight="${a.weight}"` : ''}${a.extra || ''}>${esc(s)}</text>`;
-    MARKS.forEach(([s, t, ts]) => o.push(T(g.XR + (c ? 6 : 8), Y(lg(s)) + 4, c ? ts : t, {size: c ? 10.5 : 12.5, fill:P.ink2})));
-    XTICK.forEach(([v, t, ts]) => o.push(T(X(lg(v)), g.YB + (c ? 16 : 19), c ? ts : t, {size: c ? 10.5 : 12, anchor:'middle'})));
-    (c ? XSUB_C : XSUB).forEach(([v, t]) => o.push(T(X(lg(v)), g.YB + (c ? 30 : 35), t, {size: c ? 10 : 11, anchor: c && v === 40000 ? 'end' : 'middle', fill:P.ink2})));
-    majorY.forEach(e => o.push(T(g.X0 - (c ? 5 : 8), Y(e) + 4, c ? YLAB_C[e] : (10 ** e).toLocaleString('en-US'), {size: c ? 10.5 : 12.5, anchor:'end', mono: !c})));
-    o.push(T((g.X0 + g.XR) / 2, g.YB + (c ? 55 : 62), '공간 규모: 수평 크기 (km)', {size: c ? 12.5 : 14, anchor:'middle', weight:600}));
-    const ym = (g.YT + g.YB) / 2, yx = c ? 12 : 22;
-    o.push(T(yx, ym, '시간 규모: 지속 시간 (초)', {size: c ? 12.5 : 14, anchor:'middle', weight:600, extra:` transform="rotate(-90 ${yx} ${ym.toFixed(2)})"`}));
-
-    // reference overlay
-    if (opt.showRef) {
-      BANDS.forEach((b, i) => {
-        const x1 = X(lg(b.x[0])), x2 = X(lg(b.x[1]));
-        o.push(`<rect x="${x1.toFixed(2)}" y="14" width="${(x2 - x1).toFixed(2)}" height="24" fill="${P.refSoft}" stroke="${P.ref}" stroke-width="1"/>`);
-        o.push(T((x1 + x2) / 2, 30.5, c ? b.short : b.name, {size: c ? 10.5 : 12, anchor:'middle', weight:600, fill:P.ref}));
-        if (i > 0) o.push(`<path d="M${x1.toFixed(2)} 38V${g.YB}" stroke="${P.ref}" stroke-width="1" stroke-dasharray="2 4" opacity="0.7"/>`);
-      });
-      REF.forEach(r => {
-        const x1 = X(lg(r.x[0])), x2 = X(lg(r.x[1])), y1 = Y(lg(r.y[1])), y2 = Y(lg(r.y[0]));
-        o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" fill="${P.refSoft}" stroke="${P.ref}" stroke-width="1.6" stroke-dasharray="6 4"/>`);
-        o.push(T((x1 + x2) / 2, y1 + (c ? 13 : 15), c ? r.label.replace(' ↑', '') : r.label, {size: c ? 10 : 12, anchor:'middle', weight:600, fill:P.ref}));
-      });
-    }
-
-    // example box (only before the first box is drawn)
-    const ids = Object.keys(opt.boxes);
-    if (!ids.length && opt.example) {
-      const b = EXAMPLE, x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
-      o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" fill="none" stroke="${P.example}" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>`);
-      o.push(T((x1 + x2) / 2, (y1 + y2) / 2 + 4, c ? '예시' : '예) 아침 안개', {size: c ? 11 : 12.5, anchor:'middle', fill:P.example}));
-    }
-
-    // student boxes
-    ids.map(Number).sort((a, b) => (a === opt.active) - (b === opt.active) || a - b).forEach(id => {
-      const b = opt.boxes[id], col = P.p[opt.color[id] || 0];
-      const x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
-      const on = id === opt.active;
-      o.push(`<rect x="${x1.toFixed(2)}" y="${y1.toFixed(2)}" width="${(x2 - x1).toFixed(2)}" height="${(y2 - y1).toFixed(2)}" rx="3" fill="${col}" fill-opacity="${on ? 0.22 : 0.14}" stroke="${col}" stroke-width="${on ? 2.6 : 1.8}"/>`);
-      o.push(T((x1 + x2) / 2, (y1 + y2) / 2 + (c ? 4.5 : 5), CIRC[id], {size: c ? 13 : 15, anchor:'middle', weight:600, fill:col}));
-    });
-    return o.join('');
-  }
-
-  // ---------- DOM ----------
-  const $ = s => document.querySelector(s);
-  const svg = $('#grid');
-  const ledger = $('#ledger'), picker = $('#picker'), groupsEl = $('#groups');
-
-  PH.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'lrow';
-    row.innerHTML = `
-      <div class="pname"><b><span class="num">${CIRC[p.id]}</span>${p.name}</b><small>${p.hint}</small></div>
-      <label for="p${p.id}-size"><span class="cell-label">크기 예상</span><span class="vh">${p.name} 크기 예상</span><input type="text" id="p${p.id}-size" autocomplete="off" placeholder="무엇만 한가?"></label>
-      <label for="p${p.id}-time"><span class="cell-label">지속 시간 예상</span><span class="vh">${p.name} 지속 시간 예상</span><input type="text" id="p${p.id}-time" autocomplete="off" placeholder="얼마나 가나?"></label>
-      <label class="why" for="p${p.id}-why"><span class="cell-label">근거</span><span class="vh">${p.name} 근거</span><input type="text" id="p${p.id}-why" autocomplete="off" placeholder="그렇게 생각한 근거"></label>`;
-    ledger.appendChild(row);
-    ['size','time','why'].forEach(k => {
-      const el = row.querySelector(`#p${p.id}-${k}`);
-      el.value = S.pred[p.id][k] || '';
-      el.addEventListener('input', () => { S.pred[p.id][k] = el.value; persist(); counts(); });
-    });
-    const chip = document.createElement('button');
-    chip.type = 'button'; chip.className = 'chip'; chip.dataset.id = p.id;
-    chip.innerHTML = `<span class="dot" aria-hidden="true"></span><span>${CIRC[p.id]} ${p.name}</span>`;
-    chip.addEventListener('click', () => { S.active = p.id; persist(); refresh(); });
-    picker.appendChild(chip);
-  });
-
-  for (let c = 1; c <= 4; c++) {
-    const g = document.createElement('div');
-    g.className = 'group';
-    g.innerHTML = `<span class="gs" style="--sw:var(--p${c})" aria-hidden="true"></span><label for="group-${c}" class="vh">${CNAME[c]} 묶음 이름</label><input type="text" id="group-${c}" autocomplete="off" placeholder="${CNAME[c]} 묶음 이름"><span class="members" id="members-${c}"></span>`;
-    groupsEl.appendChild(g);
-    const inp = g.querySelector('input');
-    inp.value = S.groups[c] || '';
-    inp.addEventListener('input', () => { S.groups[c] = inp.value; persist(); });
-  }
-
-  [['who-id','id'],['who-name','name'],['who-team','team']].forEach(([elId, k]) => {
-    const el = document.getElementById(elId);
-    el.value = S.who[k] || '';
-    el.addEventListener('input', () => { S.who[k] = el.value; persist(); });
-  });
-  const reflect = $('#reflect');
-  reflect.value = S.reflect || '';
-  reflect.addEventListener('input', () => { S.reflect = reflect.value; persist(); });
-
-  document.querySelectorAll('.sw').forEach(b => b.addEventListener('click', () => {
-    const c = +b.dataset.c;
-    if (c) S.color[S.active] = c; else delete S.color[S.active];
-    persist(); refresh();
-  }));
-  $('#erase').addEventListener('click', () => { delete S.boxes[S.active]; persist(); refresh(); });
-
-  function counts() {
-    $('#n-pred').textContent = PH.filter(p => (S.pred[p.id].size || '').trim() || (S.pred[p.id].time || '').trim()).length;
-    $('#n-box').textContent = Object.keys(S.boxes).length;
-  }
-
-  let draftEl = null, hx = null, hy = null;
-  function renderSVG() {
-    G = geom(svg.parentElement.clientWidth);
-    svg.setAttribute('viewBox', `0 0 ${G.W} ${G.H}`);
-    svg.innerHTML = build(VARS, {boxes:S.boxes, color:S.color, active:S.active, showRef:S.showRef, example:true}) +
-      `<path id="hx" d="" stroke="var(--accent)" stroke-width="0.8" opacity="0.6" fill="none" pointer-events="none"/>` +
-      `<path id="hy" d="" stroke="var(--accent)" stroke-width="0.8" opacity="0.6" fill="none" pointer-events="none"/>` +
-      `<rect id="draft" x="0" y="0" width="0" height="0" rx="3" fill="var(--accent)" fill-opacity="0.15" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 3" visibility="hidden" pointer-events="none"/>`;
-    draftEl = svg.querySelector('#draft'); hx = svg.querySelector('#hx'); hy = svg.querySelector('#hy');
-  }
-
-  function refresh() {
-    renderSVG(); counts();
-    const p = PH[S.active - 1];
-    $('#act-name').textContent = `${CIRC[p.id]} ${p.name}`;
-    $('#act-range').textContent = S.boxes[p.id] ? fmtBox(S.boxes[p.id]) : '아직 그리지 않음';
-    $('#erase').disabled = !S.boxes[p.id];
-    document.querySelectorAll('.sw').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.c === (S.color[p.id] || 0))));
-    picker.querySelectorAll('.chip').forEach(ch => {
-      const id = +ch.dataset.id;
-      ch.setAttribute('aria-pressed', String(id === S.active));
-      ch.classList.toggle('is-drawn', !!S.boxes[id]);
-      ch.style.setProperty('--dot', S.color[id] ? `var(--p${S.color[id]})` : 'var(--ink-2)');
-    });
-    for (let c = 1; c <= 4; c++) {
-      const m = PH.filter(q => S.color[q.id] === c).map(q => CIRC[q.id]).join(' ');
-      document.getElementById('members-' + c).textContent = m || '아직 없음';
-    }
-    const t = $('#ref-toggle');
-    t.setAttribute('aria-pressed', String(!!S.showRef));
-    t.textContent = S.showRef ? '보기 그림 범위 숨기기' : '보기 그림 범위 겹쳐 보기';
-    $('#refpanel').hidden = !S.showRef;
-    const touchTip = COARSE ? ' 격자 위를 누르는 동안에는 화면이 움직이지 않으니, 격자 바깥을 밀어 움직이세요. 휴대폰을 가로로 돌리면 격자가 커집니다.' : '';
-    $('#svg-note').textContent = (S.showRef
-      ? '보라색 점선 상자와 위쪽 띠가 보기 그림의 범위와 규모 구분입니다(어림값). ⑧⑨⑩ 상자는 격자 위로 더 이어집니다.'
-      : (Object.keys(S.boxes).length ? '점선은 1분·1시간·1일·1주일·1개월 자리입니다.' : '점선은 1분·1시간·1일·1주일·1개월 자리입니다. 회색 점선 상자는 그리는 방법을 보여 주는 예시이며, 첫 상자를 그리면 사라집니다.')) + touchTip;
-  }
-
-  // ---------- drawing ----------
-  const readout = $('#readout');
-  const DEFAULT_READ = COARSE
-    ? '격자 위를 손가락으로 끌어 상자를 그리세요. 끄는 동안 범위를 읽어 줍니다.'
-    : '격자 위에 커서를 올리면 그 자리의 크기와 시간을 읽어 줍니다.';
-  readout.textContent = DEFAULT_READ;
-  const toSvg = e => { const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const m = svg.getScreenCTM(); return m ? pt.matrixTransform(m.inverse()) : null; };
-  const inside = p => p && p.x >= G.X0 && p.x <= G.XR && p.y >= G.YT && p.y <= G.YB;
-  const toLog = p => ({
-    lx: Math.min(LXMAX, Math.max(LXMIN, (p.x - G.X0) / G.DX + LXMIN)),
-    ly: Math.min(LYMAX, Math.max(LYMIN, LYMAX - (p.y - G.YT) / G.DY))
-  });
-  let drag = null;
-  const norm = (a, b) => ({x1:Math.min(a.lx, b.lx), x2:Math.max(a.lx, b.lx), y1:Math.min(a.ly, b.ly), y2:Math.max(a.ly, b.ly)});
-  function showDraft(b) {
-    const x1 = X(b.x1), x2 = X(b.x2), y1 = Y(b.y2), y2 = Y(b.y1);
-    draftEl.setAttribute('x', x1); draftEl.setAttribute('y', y1);
-    draftEl.setAttribute('width', Math.max(0, x2 - x1)); draftEl.setAttribute('height', Math.max(0, y2 - y1));
-    draftEl.setAttribute('visibility', 'visible');
-  }
-  function hover(p) {
-    if (!inside(p)) { hx.setAttribute('d', ''); hy.setAttribute('d', ''); if (!drag) readout.textContent = DEFAULT_READ; return; }
-    hx.setAttribute('d', `M${G.X0} ${p.y}H${G.XR}`); hy.setAttribute('d', `M${p.x} ${G.YT}V${G.YB}`);
-    if (drag) return;
-    const l = toLog(p);
-    readout.innerHTML = `크기 <b>약 ${esc(fmtLen(l.lx))}</b> · 지속 시간 <b>약 ${esc(fmtTime(l.ly))}</b>`;
-  }
-  svg.addEventListener('pointerdown', e => {
-    const p = toSvg(e);
-    if (!inside(p)) return;
-    e.preventDefault();
-    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
-    drag = {a: toLog(p), id: S.active};
-  });
-  svg.addEventListener('pointermove', e => {
-    const p = toSvg(e);
-    if (drag) {
-      const b = norm(drag.a, toLog(p));
-      showDraft(b);
-      readout.innerHTML = `${CIRC[drag.id]} ${esc(PH[drag.id - 1].name)}: <b>${esc(fmtBox(b))}</b>`;
-    }
-    hover(p);
-  });
-  const finish = (e, cancel) => {
-    if (!drag) return;
-    const p = toSvg(e);
-    const b = norm(drag.a, toLog(p || {x:0, y:0}));
-    const id = drag.id;
-    drag = null;
-    if (draftEl) draftEl.setAttribute('visibility', 'hidden');
-    if (cancel) return;
-    if (b.x2 - b.x1 < 0.05 || b.y2 - b.y1 < 0.05) { readout.textContent = '조금 더 크게 끌어서 상자를 그려 보세요.'; return; }
-    S.boxes[id] = b;
-    const next = PH.find(q => !S.boxes[q.id] && q.id > id) || PH.find(q => !S.boxes[q.id]);
-    if (next) S.active = next.id;
-    persist(); refresh();
-    const nm = PH[id - 1].name, last = nm.charCodeAt(nm.length - 1) - 0xAC00;
-    const josa = last >= 0 && last < 11172 && last % 28 ? '을' : '를';
-    readout.innerHTML = `${CIRC[id]} ${esc(nm)}${josa} <b>${esc(fmtBox(b))}</b>로 그렸습니다.` + (next ? ` 다음은 ${CIRC[next.id]} ${esc(next.name)}입니다.` : ' 10개를 모두 그렸습니다.');
-  };
-  svg.addEventListener('pointerup', e => finish(e, false));
-  svg.addEventListener('pointercancel', e => finish(e, true));
-  svg.addEventListener('pointerleave', e => { if (!drag && e.pointerType !== 'touch') hover(null); });
-  let lastW = 0;
-  if (window.ResizeObserver) {
-    new ResizeObserver(() => {
-      const w = Math.round(svg.parentElement.clientWidth);
-      if (Math.abs(w - lastW) > 2 && !drag) { lastW = w; renderSVG(); }
-    }).observe(svg.parentElement);
-  }
-
-  // ---------- compare ----------
-  $('#ref-toggle').addEventListener('click', () => {
-    S.showRef = !S.showRef; persist(); refresh();
-    $('#ref-msg').textContent = S.showRef ? '2단계 격자에 보라색 점선으로 겹쳐 놓았습니다.' : '';
-  });
-
-  // ---------- export ----------
-  const msg = $('#export-msg');
-  function summary() {
-    const L = [];
-    L.push(`[시공간 규모 격자] 학번 ${S.who.id || '-'} / 이름 ${S.who.name || '-'} / 모둠 ${S.who.team || '-'}`);
-    L.push('');
-    PH.forEach(p => {
-      const q = S.pred[p.id], b = S.boxes[p.id];
-      L.push(`${CIRC[p.id]} ${p.name}`);
-      L.push(`  예상 크기: ${q.size || '-'} | 예상 지속 시간: ${q.time || '-'} | 근거: ${q.why || '-'}`);
-      L.push(`  격자 상자: ${b ? fmtBox(b) : '그리지 않음'}${S.color[p.id] ? ` | 묶음: ${CNAME[S.color[p.id]]}` : ''}`);
-    });
-    L.push('');
-    for (let c = 1; c <= 4; c++) {
-      const m = PH.filter(q => S.color[q.id] === c).map(q => CIRC[q.id]).join('');
-      if (m || S.groups[c]) L.push(`묶음(${CNAME[c]}) ${S.groups[c] || '이름 없음'}: ${m || '-'}`);
-    }
-    L.push('');
-    L.push(`가장 많이 달랐던 현상과 이유: ${S.reflect || '-'}`);
-    return L.join('\n');
-  }
-  $('#copy').addEventListener('click', () => {
-    const text = summary();
-    const fb = $('#fallback');
-    const fallback = () => { fb.hidden = false; fb.value = text; fb.focus(); fb.select(); msg.textContent = '아래 글을 선택해 두었습니다. Ctrl+C(⌘+C)로 복사하세요.'; };
-    try {
-      navigator.clipboard.writeText(text).then(() => { fb.hidden = true; msg.textContent = '결과를 복사했습니다.'; }, fallback);
-    } catch (e) { fallback(); }
-  });
-
-  const EG = geom(760);
-  function exportSVG() {
-    const head = 44, W = EG.W, H = EG.H;
-    const who = `학번 ${S.who.id || '-'}  ·  이름 ${S.who.name || '-'}  ·  모둠 ${S.who.team || '-'}`;
-    const keep = G; G = EG;
-    const inner = build(LIGHT, {boxes:S.boxes, color:S.color, active:-1, showRef:S.showRef, example:false});
-    G = keep;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H + head}" viewBox="0 0 ${W} ${H + head}">` +
-      `<rect width="${W}" height="${H + head}" fill="#ffffff"/>` +
-      `<text x="24" y="28" font-size="15" font-weight="600" fill="#16222a" font-family="${LIGHT.font}">${esc('시공간 규모 격자  ·  ' + who)}</text>` +
-      `<g transform="translate(0 ${head})">${inner}</g></svg>`;
-  }
-  const saveBtn = $('#save-png');
-  saveBtn.hidden = false;
-  saveBtn.addEventListener('click', () => {
-    msg.textContent = '';
-    const src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(exportSVG());
-    const img = new Image();
-    img.onload = () => {
-      const scale = 2, cv = document.createElement('canvas');
-      cv.width = EG.W * scale; cv.height = (EG.H + 44) * scale;
-      const ctx = cv.getContext('2d');
-      ctx.scale(scale, scale); ctx.drawImage(img, 0, 0);
-      cv.toBlob(blob => {
-        if (!blob) { msg.textContent = '그림을 만들지 못했습니다. 글로 복사를 써 주세요.'; return; }
-        const name = `규모격자_${(S.who.name || '이름').replace(/[\\/:*?"<>|]/g, '')}.png`;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = name;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 4000);
-        msg.textContent = '격자 그림을 저장했습니다. 휴대폰에서는 다운로드 폴더나 사진 앱을 확인하세요.';
-      }, 'image/png');
-    };
-    img.onerror = () => { msg.textContent = '그림을 만들지 못했습니다. 글로 복사를 써 주세요.'; };
-    img.src = src;
-  });
-
-  // ---------- reset ----------
-  const confirmBox = $('#confirm');
-  $('#reset').addEventListener('click', () => { confirmBox.hidden = false; $('#confirm-no').focus(); });
-  $('#confirm-no').addEventListener('click', () => { confirmBox.hidden = true; });
-  $('#confirm-yes').addEventListener('click', () => {
-    S = blank();
-    try { localStorage.removeItem(KEY); } catch (e) {}
-    document.querySelectorAll('input[type="text"], textarea').forEach(el => { el.value = ''; });
-    $('#fallback').hidden = true;
-    confirmBox.hidden = true; msg.textContent = '모두 지웠습니다.'; $('#ref-msg').textContent = '';
-    readout.textContent = DEFAULT_READ;
-    refresh();
-  });
-
-  refresh();
+(()=>{'use strict';
+const PH=['난류','토네이도','해륙풍','산곡풍','뇌우','태풍','고기압·저기압','편서풍 파동','계절풍','대기 대순환'];
+const NUM=['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩'];
+const INFO=[
+['공기 흐름이 불규칙하게 요동하고 소용돌이치면서 주변 공기와 섞이는 현상입니다. 지표면이나 장애물 뒤, 구름 내부 등 여러 곳에서 일어납니다.','연기나 바람의 방향이 짧은 간격에 불규칙하게 달라지는 모습을 관찰하세요.','불규칙하게 소용돌이치는 굴뚝 연기'],
+['강한 뇌우에 연결된 회전하는 공기 기둥이 지면까지 이어진 현상입니다. 깔때기 구름이 보이거나, 지면의 먼지와 파편이 회전할 수 있습니다.','회전하는 공기 기둥과 뇌우가 어떤 관계를 맺는지 관찰하세요.','뇌우 구름 아래에서 회전하는 토네이도'],
+['육지와 바다가 가열·냉각되는 속도 차이로 생기는 국지 바람입니다. 낮에는 바다에서 육지로 해풍이, 밤에는 육지에서 바다로 육풍이 부는 경향이 있습니다.','낮과 밤에 바람의 방향이 달라지는 이유를 생각하세요.','낮의 해풍이 바다에서 육지로 이동하는 순환'],
+['산비탈과 골짜기의 가열·냉각 차이로 나타납니다. 낮에는 산비탈을 따라 상승하는 곡풍이, 밤에는 냉각된 공기가 아래쪽으로 흐르는 산풍이 나타납니다.','지형과 낮·밤의 온도 차이가 바람을 어떻게 만드는지 관찰하세요.','낮의 곡풍과 밤의 산풍이 산비탈을 따라 흐르는 모습'],
+['강한 상승기류로 발달한 적란운에서 천둥과 번개가 발생하는 현상입니다. 소나기와 돌풍이 동반되며 때로 우박이 내릴 수 있습니다.','높게 발달한 구름, 번개, 강수 사이의 관계를 관찰하세요.','적란운 아래로 번개와 강한 비가 내리는 뇌우'],
+['북서태평양 등에서 발달하는 강한 열대저기압입니다. 중심 주위로 강풍과 비구름이 회전하고, 따뜻한 바다에서 공급되는 열과 수증기가 발달에 중요한 역할을 합니다.','중심부와 주변의 나선형 구름 띠를 살펴보세요.','중심 눈과 나선형 구름 띠를 가진 태풍'],
+['주변보다 기압이 높은 영역을 고기압, 낮은 영역을 저기압이라고 합니다. 북반구 지표 부근에서 고기압의 바람은 대체로 시계 방향으로 퍼지고, 저기압 주위에서는 반시계 방향으로 모입니다.','일기도의 H·L과 주변 등압선의 형태를 비교하세요.','등압선으로 표현된 고기압 H와 저기압 L'],
+['중위도 상층의 편서풍이 남북으로 크게 굽이치며 흐르는 현상입니다. 이 흐름은 기압계의 이동과 여러 지역의 날씨 변화에 영향을 미칩니다.','바람이 직선 대신 굽이치는 경로를 살펴보세요.','중위도 상층에서 남북으로 굽이치는 편서풍'],
+['대륙과 해양의 계절별 가열·냉각 차이 등으로 우세한 바람의 방향이 계절에 따라 달라지는 현상입니다. 동아시아에서는 겨울의 대륙성 기류와 여름의 해양성 기류가 특징적입니다.','겨울과 여름에 우세한 바람이 불어오는 방향을 비교하세요.','겨울과 여름의 계절풍이 서로 다른 방향으로 흐르는 모습'],
+['태양 에너지의 위도별 불균형과 지구 자전 등의 영향으로 조직화된 전 지구적 대기 순환입니다. 해들리·페렐·극 순환과 무역풍·편서풍·극동풍 같은 바람대가 포함됩니다.','적도에서 극까지 연결되는 순환과 바람대를 살펴보세요.','지구의 위도별 대기 순환을 나타낸 개념도']
+];
+const $=sel=>document.querySelector(sel);const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ART=[
+`<rect y="129" width="320" height="35" fill="#9bb6a5"/><rect x="54" y="76" width="24" height="53" rx="2" fill="#6c8190"/><path d="M66 70C30 46 100 47 94 30C88 8 45 21 90 45C141 72 139 14 181 30C209 45 170 80 224 61C258 48 275 81 298 63" stroke="#70879d" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M111 113C130 89 157 91 155 109C154 126 127 126 129 108M199 103C225 79 249 98 236 117" stroke="#3f86a7" stroke-width="4" stroke-linecap="round" fill="none"/>`,
+`<rect y="137" width="320" height="27" fill="#ada88c"/><path d="M49 68Q44 42 69 37Q80 9 112 25Q147 5 177 25Q212 12 241 40Q276 36 281 68Z" fill="#72879d"/><path d="M108 68C142 88 149 116 167 138C185 115 188 85 223 67" fill="#91a6b2"/><path d="M127 74C157 94 188 105 158 135C154 138 180 142 195 136" stroke="#416a80" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M116 92Q160 113 204 91M132 116Q160 130 190 117" stroke="#e5f0f2" stroke-width="3" fill="none" stroke-dasharray="6 5"/>`,
+`<rect y="109" width="166" height="55" fill="#72b8d1"/><rect x="166" y="109" width="154" height="55" fill="#c6b38e"/><circle cx="261" cy="31" r="18" fill="#ecc36a"/><path d="M105 104Q165 73 212 97" stroke="#227eaa" stroke-width="6" fill="none"/><path d="M200 86l14 11-15 7" stroke="#227eaa" stroke-width="4" fill="none"/><path d="M239 95Q249 60 230 49" stroke="#d48054" stroke-width="4" fill="none"/><path d="M219 62l10-15 12 13" stroke="#d48054" stroke-width="3" fill="none"/><path d="M220 36Q161 23 86 44" stroke="#7f98b4" stroke-dasharray="7 6" stroke-width="4" fill="none"/><text x="52" y="145" font-size="15" fill="#23566d">바다</text><text x="235" y="145" font-size="15" fill="#64543b">육지</text>`,
+`<path d="M0 0H160V164H0Z" fill="#e9f4f9"/><path d="M160 0H320V164H160Z" fill="#e5e8f4"/><path d="M0 147L83 51 160 147Z" fill="#8eaa84"/><path d="M160 147L240 51 320 147Z" fill="#8795aa"/><circle cx="30" cy="29" r="15" fill="#e8bd68"/><path d="M286 16A18 18 0 1 0 304 47A18 18 0 0 1 286 16" fill="#efe3b2"/><path d="M39 132L73 89M65 91l9-7 4 15" stroke="#d97049" stroke-width="5" fill="none"/><path d="M243 81l39 49M267 129l17 4-1-17" stroke="#537ea8" stroke-width="5" fill="none"/><text x="12" y="156" font-size="13" fill="#35596e">낮 · 곡풍</text><text x="177" y="156" font-size="13" fill="#394c73">밤 · 산풍</text>`,
+`<rect y="138" width="320" height="26" fill="#86a892"/><path d="M58 96Q44 78 65 57Q56 27 92 30Q103 5 133 19Q151 0 182 22Q223 10 238 44Q272 38 275 66Q290 85 269 96Z" fill="#7389a1"/><path d="M86 97h165" stroke="#506c86" stroke-width="6"/><path d="M136 94l-20 32 21-5-8 29 42-48-23 4 13-12" fill="#f3cf62"/><path d="M76 108l-10 22M102 109l-10 22M211 108l-10 22M235 108l-10 22" stroke="#378dbd" stroke-linecap="round" stroke-width="4"/>`,
+`<rect width="320" height="164" fill="#6cb0c8"/><circle cx="160" cy="82" r="75" fill="#b5d6e4" opacity=".22"/><path d="M70 90C65 36 122 19 183 25C250 38 265 107 215 137C162 159 106 125 124 86C137 53 186 51 194 77C205 107 159 121 146 97" stroke="#f8fafa" stroke-width="20" stroke-linecap="round" fill="none"/><path d="M81 77C123 18 226 24 248 92C269 148 170 152 135 127" stroke="#d1eaf2" stroke-width="10" fill="none"/><circle cx="159" cy="84" r="13" fill="#327ca8"/><circle cx="159" cy="84" r="6" fill="#a2cbd9"/>`,
+`<g fill="none" stroke="#85a3b6" stroke-width="2"><ellipse cx="86" cy="83" rx="70" ry="52"/><ellipse cx="86" cy="83" rx="51" ry="38"/><ellipse cx="86" cy="83" rx="30" ry="23"/><ellipse cx="234" cy="83" rx="70" ry="52"/><ellipse cx="234" cy="83" rx="51" ry="38"/><ellipse cx="234" cy="83" rx="30" ry="23"/></g><text x="74" y="91" font-size="27" fill="#397ba6" font-weight="700">H</text><text x="224" y="91" font-size="27" fill="#bb5c58" font-weight="700">L</text><path d="M31 23Q90 5 140 27M182 135Q239 152 292 130" fill="none" stroke="#467ca5" stroke-width="4"/><path d="M128 17l14 10-13 9M197 144l-15-9 8-14" fill="none" stroke="#467ca5" stroke-width="3"/>`,
+`<path d="M12 125Q160 174 308 125M12 94Q160 141 308 94M12 62Q160 109 308 62M12 32Q160 78 308 32" fill="none" stroke="#adcbd6" stroke-width="2" stroke-dasharray="5 5"/><path d="M14 90C54 9 95 12 124 66S195 148 223 83S271 21 304 49" fill="none" stroke="#d8794a" stroke-width="8" stroke-linecap="round"/><path d="M292 38l14 11-15 10" fill="none" stroke="#d8794a" stroke-width="5"/><text x="18" y="154" font-size="13" fill="#506f83">중위도 상층의 바람</text>`,
+`<path d="M0 0H160V164H0Z" fill="#e4ecf2"/><path d="M160 0H320V164H160Z" fill="#eff0e2"/><path d="M0 107H320V164H0Z" fill="#80bfd0"/><path d="M0 107H86V164H0ZM160 107H246V164H160Z" fill="#baaf8c"/><path d="M35 73H131M119 61l14 12-14 12" stroke="#548bad" stroke-width="6" fill="none"/><path d="M286 73H190M204 61l-14 12 14 12" stroke="#db8b5d" stroke-width="6" fill="none"/><text x="18" y="36" font-size="16" fill="#476881">겨울</text><text x="178" y="36" font-size="16" fill="#79624f">여름</text><text x="10" y="154" font-size="12">대륙</text><text x="101" y="154" font-size="12">해양</text><text x="169" y="154" font-size="12">대륙</text><text x="259" y="154" font-size="12">해양</text>`,
+`<ellipse cx="160" cy="82" rx="122" ry="73" fill="#9ccbd7" stroke="#4d95b5" stroke-width="2"/><path d="M42 63Q160 93 278 63M42 102Q160 72 278 102M72 31Q160 81 248 31M72 134Q160 83 248 134M160 10C122 43 122 121 160 155M160 10C198 43 198 121 160 155" stroke="#e1f1f5" stroke-width="2" fill="none"/><path d="M72 55Q99 21 127 55M193 55Q220 21 247 55" stroke="#d98554" stroke-width="4" fill="none"/><path d="M73 110Q98 144 128 110M192 110Q219 144 248 110" stroke="#518bad" stroke-width="4" fill="none"/><path d="M131 82Q160 44 189 82Q160 119 131 82" stroke="#328d83" stroke-width="4" fill="none"/><text x="146" y="87" font-size="12" fill="#1f6371">적도</text>`
+];
+function icon(i){return `<svg class="art" role="img" aria-label="${esc(INFO[i][2])}" viewBox="0 0 320 164" xmlns="http://www.w3.org/2000/svg"><rect width="320" height="164" fill="#e6f1f8"/>${ART[i]}</svg>`}
+const concepts=$('#concepts'),picker=$('#picker'),groupWrap=$('#groups'),svg=$('#grid');
+PH.forEach((p,i)=>{const c=document.createElement('article');c.className='concept';c.innerHTML=icon(i)+`<div class="concept-copy"><h3><span class="num">${NUM[i]}</span>${esc(p)}</h3><p>${esc(INFO[i][0])}</p><p class="observe"><strong>관찰할 점 · </strong>${esc(INFO[i][1])}</p></div>`;concepts.append(c);const b=document.createElement('button');b.type='button';b.className='chip';b.dataset.i=i+1;b.innerHTML=`<span class="dot" aria-hidden="true"></span><span>${NUM[i]} ${esc(p)}</span>`;b.onclick=()=>select(i+1);picker.append(b)});
+const COL=['','#c44b4a','#c39330','#358665','#4367ab'],CNAME=['','빨강','노랑','초록','파랑'];
+for(let i=1;i<=4;i++){const d=document.createElement('label');d.className='group';d.innerHTML=`<span class="marker" style="--marker:${COL[i]}"></span><input id="group${i}" type="text" placeholder="${CNAME[i]} 묶음 이름" aria-label="${CNAME[i]} 묶음 이름"><small id="member${i}">아직 없음</small>`;groupWrap.append(d)}
+const blank=()=>({who:{id:'',name:'',team:''},boxes:{},color:{},groups:{},reflect:'',active:1,showRef:false});const STORAGE='scale-grid-activity-v2',OLD='scale-grid-activity-v1';let S=blank();try{const d=JSON.parse(localStorage.getItem(STORAGE)||localStorage.getItem(OLD)||'null');if(d&&typeof d==='object'){S={...blank(),...d,who:{...blank().who,...d.who},boxes:d.boxes||{},color:d.color||{},groups:d.groups||{}};if(Array.isArray(S.groups))S.groups={1:S.groups[1]||'',2:S.groups[2]||'',3:S.groups[3]||'',4:S.groups[4]||''};if(!Number.isInteger(+S.active)||S.active<1||S.active>10)S.active=1}}catch(e){}
+let saveTask=null;function save(){clearTimeout(saveTask);saveTask=setTimeout(()=>{try{localStorage.setItem(STORAGE,JSON.stringify(S))}catch(e){}},200)}
+for(const [id,k] of [['who-id','id'],['who-name','name'],['who-team','team']]){const e=$('#'+id);e.value=S.who[k]||'';e.addEventListener('input',()=>{S.who[k]=e.value;save()})}for(let i=1;i<=4;i++){const e=$('#group'+i);e.value=S.groups[i]||'';e.addEventListener('input',()=>{S.groups[i]=e.value;save()})}$('#reflect').value=S.reflect||'';$('#reflect').addEventListener('input',e=>{S.reflect=e.target.value;save()});
+const LX0=-3,LX1=Math.log10(40000),LY0=0,LY1=7;const W=760,H=464,X0=110,XR=655,YT=43,YB=372,DX=(XR-X0)/(LX1-LX0),DY=(YB-YT)/(LY1-LY0);const x=v=>X0+(v-LX0)*DX,y=v=>YB-v*DY,lg=Math.log10,clamp=(v,a,b)=>Math.min(b,Math.max(a,v));const GE={width:W,height:H};const majorX=[-3,-2,-1,0,1,2,3,4],majorY=[0,1,2,3,4,5,6,7];const MARKS=[[60,'1분'],[3600,'1시간'],[86400,'1일'],[604800,'1주일'],[2592000,'1개월']];
+const REF=[{n:'①',x:[.001,.1],t:[1,100]},{n:'②',x:[.1,1],t:[100,10000]},{n:'③④⑤',x:[1,100],t:[10000,86400]},{n:'⑥',x:[100,500],t:[86400,604800]},{n:'⑦',x:[500,3000],t:[86400,604800]},{n:'⑧⑨⑩',x:[3000,40000],t:[604800,10000000]}];const BANDS=[['미규모',.001,1],['중간규모',1,100],['종관규모',100,3000],['지구규모',3000,40000]];
+function nice(v){return v>=10?(Math.round(v/10)*10).toLocaleString('ko-KR'):(Math.round(v*10)/10).toLocaleString('ko-KR')}function len(v){const km=10**v;return km<1?nice(km*1000)+'m':nice(km)+'km'}function time(v){const s=10**v;return s<60?nice(s)+'초':s<3600?nice(s/60)+'분':s<86400?nice(s/3600)+'시간':s<604800?nice(s/86400)+'일':s<2592000?nice(s/604800)+'주':nice(s/2592000)+'개월'}function fmt(b){return `약 ${len(b.x1)}~${len(b.x2)} · 약 ${time(b.y1)}~${time(b.y2)}`}
+function lineText(tx,ty,txt,opts=''){const size=opts.includes('font-size=')?'':'font-size="12"',fill=opts.includes('fill=')?'':'fill="#253b47"';return `<text x="${tx}" y="${ty}" ${size} ${fill} font-family="Arial,sans-serif" ${opts}>${esc(txt)}</text>`}
+function buildGrid(interactive=true){const a=[];a.push(`<rect width="${W}" height="${H}" fill="#fff"/>`);for(let e=-3;e<=4;e++)for(let k=2;k<=9;k++){const v=lg(k*10**e);if(v<LX1)a.push(`<path d="M${x(v)} ${YT}V${YB}" stroke="#e8eeec" stroke-width=".6"/>`)}for(let e=0;e<=6;e++)for(let k=2;k<=9;k++){const v=e+lg(k);a.push(`<path d="M${X0} ${y(v)}H${XR}" stroke="#e8eeec" stroke-width=".6"/>`)}for(const v of majorX)a.push(`<path d="M${x(v)} ${YT}V${YB}" stroke="#bccbc9" stroke-width=".9"/>`);for(const v of majorY)a.push(`<path d="M${X0} ${y(v)}H${XR}" stroke="#bccbc9" stroke-width=".9"/>`);for(const [s,t] of MARKS){a.push(`<path d="M${X0} ${y(lg(s))}H${XR}" stroke="#778d97" stroke-width=".8" stroke-dasharray="4 4"/>`);a.push(lineText(XR+8,y(lg(s))+4,t,'fill="#697c85"'))}a.push(`<rect x="${X0}" y="${YT}" width="${XR-X0}" height="${YB-YT}" stroke="#344c55" stroke-width="1.4" fill="none"/>`);
+for(const [v,t] of [[.001,'0.001'],[.01,'0.01'],[.1,'0.1'],[1,'1'],[10,'10'],[100,'100'],[1000,'1,000'],[10000,'10,000'],[40000,'40,000']])a.push(lineText(x(lg(v)),YB+20,t,'text-anchor="middle"'));for(const v of majorY)a.push(lineText(X0-9,y(v)+4,(10**v).toLocaleString('en-US'),'text-anchor="end"'));a.push(lineText((X0+XR)/2,YB+56,'공간 규모: 수평 크기 (km)','text-anchor="middle" font-size="15" font-weight="700"'));a.push(lineText(25,(YT+YB)/2,'시간 규모: 지속 시간 (초)',`transform="rotate(-90 25 ${(YT+YB)/2})" text-anchor="middle" font-size="15" font-weight="700"`));
+if(S.showRef){for(const [name,from,to] of BANDS){const xx=x(lg(from)),ww=x(lg(to))-xx;a.push(`<rect x="${xx}" y="12" width="${ww}" height="24" fill="#f2eafa" stroke="#8d50a0"/>`);a.push(lineText(xx+ww/2,28,name,'text-anchor="middle" fill="#703e87" font-weight="700"'))}for(const q of REF){const xx=x(lg(q.x[0])),yy=y(lg(q.t[1])),ww=x(lg(q.x[1]))-xx,hh=y(lg(q.t[0]))-yy;a.push(`<rect x="${xx}" y="${yy}" width="${ww}" height="${hh}" fill="#f6eafa" fill-opacity=".5" stroke="#8d50a0" stroke-width="1.6" stroke-dasharray="5 4"/>`);a.push(lineText(xx+ww/2,yy+15,q.n,'text-anchor="middle" fill="#773f91" font-weight="700"'))}}
+const ids=Object.keys(S.boxes).map(Number).filter(i=>i>=1&&i<=10).sort((a,b)=>(a===S.active)-(b===S.active)||a-b);for(const id of ids){const b=S.boxes[id],c=COL[S.color[id]||0]||'#126a78',xx=x(b.x1),xx2=x(b.x2),yy=y(b.y2),yy2=y(b.y1),active=id===S.active;const attr=interactive?` class="boxhit" data-box-id="${id}"`:'';a.push(`<rect${attr} x="${xx}" y="${yy}" width="${xx2-xx}" height="${yy2-yy}" rx="2" fill="${c}" fill-opacity="${active?.19:.13}" stroke="${c}" stroke-width="${active?2.6:1.7}"/>`);a.push(`<text ${interactive?`class="boxhit" data-box-id="${id}"`:''} x="${(xx+xx2)/2}" y="${(yy+yy2)/2+5}" text-anchor="middle" font-size="16" font-weight="700" font-family="Arial,sans-serif" fill="${c}">${NUM[id-1]}</text>`);if(active&&interactive){for(const [h,cx,cy] of [['nw',xx,yy],['ne',xx2,yy],['sw',xx,yy2],['se',xx2,yy2]])a.push(`<circle class="handle" data-box-id="${id}" data-handle="${h}" cx="${cx}" cy="${cy}" r="7" fill="white" stroke="${c}" stroke-width="2.5"/>`)}}
+return a.join('')}
+let draft=null,crossX=null,crossY=null,drag=null,redraw=false;function renderGrid(){svg.innerHTML=buildGrid(true)+`<path id="cross-x" d="" stroke="#126a78" opacity=".7" stroke-width=".7" pointer-events="none"/><path id="cross-y" d="" stroke="#126a78" opacity=".7" stroke-width=".7" pointer-events="none"/><rect id="draft" visibility="hidden" x="0" y="0" width="0" height="0" fill="#126a78" fill-opacity=".14" stroke="#126a78" stroke-width="2" stroke-dasharray="5 4" pointer-events="none"/>`;draft=$('#draft');crossX=$('#cross-x');crossY=$('#cross-y')}
+function refresh(){renderGrid();$('#nbox').textContent=Object.keys(S.boxes).length;$('#active-name').textContent=NUM[S.active-1]+' '+PH[S.active-1];$('#active-range').textContent=S.boxes[S.active]?fmt(S.boxes[S.active]):'아직 그리지 않음';$('#prev').disabled=S.active===1;$('#next').disabled=S.active===10;$('#erase').disabled=!S.boxes[S.active];$('#redraw').setAttribute('aria-pressed',String(redraw));$('#redraw').textContent=redraw?'다시 그리기 취소':'상자 다시 그리기';$('#edit-help').textContent=redraw?'현재 선택한 상자를 새 위치에 다시 그려 보세요.':S.boxes[S.active]?'상자를 끌면 이동하고, 모서리를 끌면 크기가 조절됩니다. 다른 현상은 이전/다음 버튼 또는 번호를 선택하세요.':'격자에서 드래그해 상자를 그리세요. 다음 현상으로 자동 이동하지 않습니다.';for(const ch of picker.querySelectorAll('button')){const id=+ch.dataset.i;ch.setAttribute('aria-pressed',String(id===S.active));ch.classList.toggle('done',!!S.boxes[id]);ch.style.setProperty('--dot',COL[S.color[id]||0]||'#126a78')}document.querySelectorAll('.sw').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.color===(S.color[S.active]||0))));for(let i=1;i<=4;i++){$('#member'+i).textContent=PH.map((_,j)=>S.color[j+1]===i?NUM[j]:'').filter(Boolean).join(' ')||'아직 없음'}$('#reference').setAttribute('aria-pressed',String(S.showRef));$('#reference').textContent=S.showRef?'참고 범위 숨기기':'참고 범위 겹쳐 보기';$('#reference-panel').hidden=!S.showRef}
+function select(i){S.active=i;redraw=false;save();refresh();$('#readout').textContent=NUM[i-1]+' '+PH[i-1]+' 선택됨. 격자에서 표시하거나 수정할 수 있습니다.'}$('#prev').onclick=()=>{if(S.active>1)select(S.active-1)};$('#next').onclick=()=>{if(S.active<10)select(S.active+1)};$('#redraw').onclick=()=>{redraw=!redraw;refresh();$('#readout').textContent=redraw?'이제 격자의 원하는 곳에서 새 상자를 드래그해 기존 상자를 교체하세요.':'다시 그리기를 취소했습니다.'};$('#erase').onclick=()=>{delete S.boxes[S.active];redraw=false;save();refresh();$('#readout').textContent='선택한 현상의 상자를 삭제했습니다.'};document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{const n=+b.dataset.color;if(n)S.color[S.active]=n;else delete S.color[S.active];save();refresh()});
+const readout=$('#readout');function position(e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();return m?pt.matrixTransform(m.inverse()):null}function isInside(p){return p&&p.x>=X0&&p.x<=XR&&p.y>=YT&&p.y<=YB}function toLog(p){return {lx:clamp((p.x-X0)/DX+LX0,LX0,LX1),ly:clamp((YB-p.y)/DY,LY0,LY1)}}function norm(a,b){return{x1:Math.min(a.lx,b.lx),x2:Math.max(a.lx,b.lx),y1:Math.min(a.ly,b.ly),y2:Math.max(a.ly,b.ly)}}function showDraft(b){draft.setAttribute('x',x(b.x1));draft.setAttribute('y',y(b.y2));draft.setAttribute('width',x(b.x2)-x(b.x1));draft.setAttribute('height',y(b.y1)-y(b.y2));draft.setAttribute('visibility','visible')}
+function edited(t){const b=drag.original,m=.09;if(drag.mode==='move'){const w=b.x2-b.x1,h=b.y2-b.y1,x1=clamp(b.x1+t.lx-drag.start.lx,LX0,LX1-w),y1=clamp(b.y1+t.ly-drag.start.ly,LY0,LY1-h);return{x1,x2:x1+w,y1,y2:y1+h}}const o={...b};if(drag.handle.includes('w'))o.x1=clamp(t.lx,LX0,b.x2-m);if(drag.handle.includes('e'))o.x2=clamp(t.lx,b.x1+m,LX1);if(drag.handle.includes('s'))o.y1=clamp(t.ly,LY0,b.y2-m);if(drag.handle.includes('n'))o.y2=clamp(t.ly,b.y1+m,LY1);return o}
+function dragMove(e){if(!drag)return;const p=position(e);if(!p)return;const t=toLog(p);drag.latest=drag.mode==='draw'?norm(drag.start,t):edited(t);showDraft(drag.latest);readout.innerHTML=`${NUM[drag.id-1]} ${esc(PH[drag.id-1])}: <strong>${esc(fmt(drag.latest))}</strong>`}
+svg.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;const p=position(e);if(!isInside(p))return;e.preventDefault();let clicked=redraw?0:+(e.target.getAttribute('data-box-id')||0);if(clicked&&clicked!==S.active){S.active=clicked;save();refresh()}const b=S.boxes[S.active],handle=!redraw&&clicked===S.active?(e.target.getAttribute('data-handle')||''):'';drag={id:S.active,start:toLog(p),mode:clicked&&b&&!redraw?(handle?'resize':'move'):'draw',handle,original:b?{...b}:null,latest:null};try{svg.setPointerCapture(e.pointerId)}catch(err){}});
+svg.addEventListener('pointermove',e=>{if(drag){dragMove(e);return}const p=position(e);if(!isInside(p)){crossX.setAttribute('d','');crossY.setAttribute('d','');return}crossX.setAttribute('d',`M${X0} ${p.y}H${XR}`);crossY.setAttribute('d',`M${p.x} ${YT}V${YB}`);const t=toLog(p);readout.innerHTML=`크기 <strong>약 ${esc(len(t.lx))}</strong> · 지속 시간 <strong>약 ${esc(time(t.ly))}</strong>`});
+function finish(e,cancel){if(!drag)return;if(!cancel)dragMove(e);const {id,mode,latest}=drag;drag=null;if(draft)draft.setAttribute('visibility','hidden');if(cancel||!latest)return;if(mode==='draw'&&(latest.x2-latest.x1<.05||latest.y2-latest.y1<.05)){readout.textContent='상자를 그리려면 가로와 세로 방향으로 더 크게 드래그하세요.';return}S.boxes[id]=latest;redraw=false;save();refresh();readout.innerHTML=`${NUM[id-1]} ${esc(PH[id-1])} · <strong>${mode==='draw'?'그리기':mode==='move'?'이동':'크기 조절'} 완료</strong>. 현재 현상은 선택된 상태로 유지됩니다.`}
+svg.addEventListener('pointerup',e=>finish(e,false));svg.addEventListener('pointercancel',e=>finish(e,true));svg.addEventListener('pointerleave',()=>{if(!drag){crossX.setAttribute('d','');crossY.setAttribute('d','')}});
+$('#reference').onclick=()=>{S.showRef=!S.showRef;save();refresh();$('#ref-status').textContent=S.showRef?'2단계 격자에 보라색 점선으로 표시했습니다.':'참고 범위를 숨겼습니다.'};function summary(){const lines=[`[기상 현상의 시공간 규모] 학번 ${S.who.id||'-'} / 이름 ${S.who.name||'-'} / 모둠 ${S.who.team||'-'}`,''];PH.forEach((p,i)=>{lines.push(`${NUM[i]} ${p} — ${S.boxes[i+1]?fmt(S.boxes[i+1]):'배치하지 않음'}${S.color[i+1]?` / 묶음: ${CNAME[S.color[i+1]]}`:''}`)});lines.push('');for(let i=1;i<=4;i++){const m=PH.map((_,j)=>S.color[j+1]===i?NUM[j]:'').filter(Boolean).join('');if(m||S.groups[i])lines.push(`${CNAME[i]} 묶음(${S.groups[i]||'이름 없음'}): ${m||'-'}`)}lines.push('');lines.push('비교 후 생각: '+(S.reflect||'-'));return lines.join('\n')}
+$('#copy').onclick=()=>{const text=summary(),fallback=()=>{const f=$('#fallback');f.hidden=false;f.value=text;f.focus();f.select();$('#message').textContent='아래 글을 선택했습니다. Ctrl+C로 복사하세요.'};if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(()=>{$('#fallback').hidden=true;$('#message').textContent='결과를 복사했습니다.'},fallback);else fallback()};
+$('#export').onclick=()=>{const p=buildGrid(false),who=`학번 ${S.who.id||'-'} · 이름 ${S.who.name||'-'} · 모둠 ${S.who.team||'-'}`,data=`<svg xmlns="http://www.w3.org/2000/svg" width="760" height="508" viewBox="0 0 760 508"><rect width="760" height="508" fill="white"/><text x="18" y="28" fill="#142932" font-size="15" font-family="sans-serif">${esc('기상 현상 시공간 규모 · '+who)}</text><g transform="translate(0 44)">${p}</g></svg>`;const blob=new Blob([data],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob),img=new Image();img.onload=()=>{const canvas=document.createElement('canvas');canvas.width=1520;canvas.height=1016;const ctx=canvas.getContext('2d');ctx.scale(2,2);ctx.drawImage(img,0,0);URL.revokeObjectURL(url);canvas.toBlob(b=>{if(!b){$('#message').textContent='이미지 생성에 실패했습니다.';return}const obj=URL.createObjectURL(b),a=document.createElement('a');a.href=obj;a.download=`시공간규모_${(S.who.name||'학생').replace(/[\\/:*?"<>|]/g,'')}.png`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(obj),3000);$('#message').textContent='PNG 파일을 저장했습니다.'},'image/png')};img.onerror=()=>{$('#message').textContent='이미지 생성에 실패했습니다.';URL.revokeObjectURL(url)};img.src=url};
+$('#reset').onclick=()=>{$('#confirm').hidden=false;$('#confirm-no').focus()};$('#confirm-no').onclick=()=>{$('#confirm').hidden=true};$('#confirm-yes').onclick=()=>{S=blank();redraw=false;try{localStorage.removeItem(STORAGE);localStorage.removeItem(OLD)}catch(e){};document.querySelectorAll('input[type="text"],textarea').forEach(el=>el.value='');$('#confirm').hidden=true;$('#fallback').hidden=true;$('#message').textContent='입력한 결과를 모두 지웠습니다.';$('#ref-status').textContent='';refresh()};refresh();
 })();
 </script>
-</body>
-</html>
+</body></html>
